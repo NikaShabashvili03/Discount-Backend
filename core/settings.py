@@ -120,7 +120,9 @@ AUTHENTICATION_BACKENDS = [
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -147,24 +149,15 @@ CORS_ALLOW_METHODS = ['*']
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
-    'https://b2b-backend-1.onrender.com',
-    'https://b2b-backend-3.onrender.com',
-    'https://tourbackend-fl03.onrender.com'
 ]
 
 ALLOWED_HOSTS = [
     '127.0.0.1', 
     'localhost',
-    'tourbackend-fl03.onrender.com',
-    'b2b-backend-1.onrender.com',
-    'b2b-backend-3.onrender.com'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
-    'https://b2b-backend-1.onrender.com',
-    'https://b2b-backend-3.onrender.com',
-    'https://tourbackend-fl03.onrender.com'
 ]
 
 SESSION_COOKIE_SECURE = False
@@ -227,3 +220,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+BOG_MERCHANT_ID = config('BOG_MERCHANT_ID', default='your_merchant_id')
+BOG_API_KEY = config('BOG_API_KEY', default='your_api_key')
+BOG_REDIRECT_URL = config('BOG_REDIRECT_URL', default='https://yourdomain.com/api/payment/callback/')
+BOG_BASE_URL = config('BOG_BASE_URL', default='https://api.bog.ge/paymentgateway/')

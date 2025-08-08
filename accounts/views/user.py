@@ -7,7 +7,7 @@ import uuid
 from django.utils.timezone import now
 from datetime import timedelta
 from ..models import Session, BlackList
-from ..utils import get_client_ip, get_lang_from_path
+from ..utils import get_client_ip
 
 class RegisterView(generics.GenericAPIView):
     serializer_class = UserRegisterSerializer

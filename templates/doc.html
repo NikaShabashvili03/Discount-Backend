@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DiscountGe API Documentation</title>
+    <style>
+        @media print {
+            body { font-size: 12pt; line-height: 1.4; }
+            .page-break { page-break-before: always; }
+            .no-print { display: none; }
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            color: #007bff;
+            font-size: 2.5em;
+            margin: 0;
+            font-weight: 300;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .toc h2 {
+            margin-top: 0;
+            color: #007bff;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        
+        .toc a {
+            text-decoration: none;
+            color: #495057;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #007bff;
+        }
+        
+        .section {
+            margin-bottom: 50px;
+        }
+        
+        .section h2 {
+            color: #007bff;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+        
+        .endpoint {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        
+        .endpoint-header {
+            background: #007bff;
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+        }
+        
+        .endpoint-content {
+            padding: 20px;
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .method.GET { background: #28a745; color: white; }
+        .method.POST { background: #007bff; color: white; }
+        .method.PUT { background: #ffc107; color: black; }
+        .method.DELETE { background: #dc3545; color: white; }
+        
+        .url {
+            font-family: 'Courier New', monospace;
+            background: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        
+        .params-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .params-table th,
+        .params-table td {
+            border: 1px solid #dee2e6;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .params-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+        
+        .base-info {
+            background: #e7f3ff;
+            border: 1px solid #b8daff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .base-info h3 {
+            margin-top: 0;
+            color: #0056b3;
+        }
+        
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .print-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <button class="print-btn no-print" onclick="window.print()">📄 Print/Save as PDF</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1>DiscountGe API Documentation</h1>
+            <p>Complete REST API Reference Guide</p>
+            <p><strong>Version:</strong> v1/v2/v3 | <strong>Date:</strong> January 2025</p>
+        </div>
+
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#overview">1. API Overview</a></li>
+                <li><a href="#authentication">2. Authentication</a></li>
+                <li><a href="#cities">3. Cities</a></li>
+                <li><a href="#categories">4. Categories</a></li>
+                <li><a href="#services">5. Services</a></li>
+                <li><a href="#orders">6. Orders</a></li>
+                <li><a href="#payments">7. Payments</a></li>
+            </ul>
+        </div>
+
+        <div class="base-info">
+            <h3>Base URL</h3>
+            <code>https://admin.discount.com.ge</code>
+            <p>All API endpoints are relative to this base URL. The API supports multiple languages through URL prefixes (<code>/en/</code>, <code>/ru/</code>).</p>
+        </div>
+
+        <section id="overview" class="section">
+            <h2>1. API Overview</h2>
+            <p>The DiscountGe API is a RESTful web service that provides access to discount services, user management, and booking functionality. The API uses standard HTTP methods and returns JSON responses.</p>
+            
+            <h3>API Versions</h3>
+            <ul>
+                <li><strong>v1:</strong> User authentication and profile management</li>
+                <li><strong>v2:</strong> Services, categories, and cities</li>
+                <li><strong>v3:</strong> Orders and payments</li>
+            </ul>
+            
+            <h3>Content Types</h3>
+            <ul>
+                <li><strong>JSON:</strong> <code>application/json</code></li>
+                <li><strong>Form Data:</strong> <code>multipart/form-data</code> (for file uploads)</li>
+            </ul>
+        </section>
+
+        <div class="page-break"></div>
+
+        <section id="authentication" class="section">
+            <h2>2. Authentication</h2>
+            <p>The API uses session-based authentication with cookies. Users must login to access protected endpoints.</p>
+
+            <div class="endpoint">
+                <div class="endpoint-header">User Registration</div>
+                <div class="endpoint-content">
+                    <span class="method POST">POST</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v1/user/register/</div>
+                    
+                    <h4>Request Body (JSON)</h4>
+                    <div class="code-block">{
+    "firstname": "John",
+    "lastname": "Doe",
+    "country": "Georgia",
+    "mobile": "577019220",
+    "email": "john.doe@example.com",
+    "password": "securepassword"
+}</div>
+                    
+                    <h4>Parameters</h4>
+                    <table class="params-table">
+                        <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+                        <tr><td>firstname</td><td>string</td><td>Yes</td><td>User's first name</td></tr>
+                        <tr><td>lastname</td><td>string</td><td>Yes</td><td>User's last name</td></tr>
+                        <tr><td>country</td><td>string</td><td>Yes</td><td>User's country</td></tr>
+                        <tr><td>mobile</td><td>string</td><td>Yes</td><td>Mobile phone number</td></tr>
+                        <tr><td>email</td><td>string</td><td>Yes</td><td>Valid email address</td></tr>
+                        <tr><td>password</td><td>string</td><td>Yes</td><td>User password</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">User Login</div>
+                <div class="endpoint-content">
+                    <span class="method POST">POST</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v1/user/login/</div>
+                    
+                    <h4>Request Body (JSON)</h4>
+                    <div class="code-block">{
+    "email": "john.doe@example.com",
+    "password": "securepassword"
+}</div>
+
+                    <h4>Parameters</h4>
+                    <table class="params-table">
+                        <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+                        <tr><td>email</td><td>string</td><td>Yes</td><td>User's email address</td></tr>
+                        <tr><td>password</td><td>string</td><td>Yes</td><td>User's password</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">User Profile</div>
+                <div class="endpoint-content">
+                    <span class="method GET">GET</span>
+                    <div class="url">https://admin.discount.com.ge/api/v1/user/profile/</div>
+                    <p><strong>Authentication Required:</strong> Yes</p>
+                    <p>Returns the authenticated user's profile information.</p>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">User Logout</div>
+                <div class="endpoint-content">
+                    <span class="method POST">POST</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v1/user/logout/</div>
+                    <p><strong>Authentication Required:</strong> Yes</p>
+                    <p>Logs out the current user and invalidates the session.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="page-break"></div>
+
+        <section id="cities" class="section">
+            <h2>3. Cities</h2>
+            <p>Endpoints for managing cities where services are available.</p>
+
+            <div class="endpoint">
+                <div class="endpoint-header">List All Cities</div>
+                <div class="endpoint-content">
+                    <span class="method GET">GET</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v2/city/all/</div>
+                    <p>Returns a list of all available cities.</p>
+                    
+                    <h4>Response Example</h4>
+                    <div class="code-block">[
+    {
+        "id": 1,
+        "name": "Tbilisi",
+        "country": "Georgia"
+    },
+    {
+        "id": 2,
+        "name": "Batumi",
+        "country": "Georgia"
+    }
+]</div>
+                </div>
+            </div>
+        </section>
+
+          <section id="events" class="section">
+            <h2>3. Events</h2>
+            <p>Endpoints for managing events where services are available.</p>
+
+            <div class="endpoint">
+                <div class="endpoint-header">List All Events</div>
+                <div class="endpoint-content">
+                    <span class="method GET">GET</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v2/events/all/</div>
+                    <p>Returns a list of all available events.</p>
+                    
+                    <h4>Response Example</h4>
+                    <div class="code-block">[
+    {
+        "id": 1,
+        "name": "EventName",
+        "location": "Gasd",
+        "description": String,
+        "category": String
+        "price": number
+        "keywords": [
+            {
+                word: string
+            }
+        ],
+        "rating": [
+            {
+                score: number
+            }
+        ],
+        average_rating: number
+    },
+]</div>
+                </div>
+            </div>
+
+
+            <div class="endpoint">
+                <div class="endpoint-header">Details of Event</div>
+                <div class="endpoint-content">
+                    <span class="method GET">GET</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v2/events/(id)/</div>
+                    <p>Returns a details of events by id.</p>
+                    
+                    <h4>Response Example</h4>
+                    <div class="code-block">
+    {
+        "id": 1,
+        "name": "EventName",
+        "location": "Gasd",
+        "description": String,
+        "category": String
+        "price": number
+        "keywords": [
+            {
+                word: string
+            }
+        ],
+        "rating": [
+            {
+                score: number
+            }
+        ],
+        average_rating: number
+    },
+</div>
+                </div>
+            </div>
+        </section>
+
+
+        <section id="categories" class="section">
+            <h2>4. Categories</h2>
+            <p>Endpoints for managing service categories.</p>
+
+            <div class="endpoint">
+                <div class="endpoint-header">List All Categories</div>
+                <div class="endpoint-content">
+                    <span class="method GET">GET</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v2/category/all/</div>
+                    <p>Returns a list of all service categories.</p>
+                    
+                    <h4>Response Example</h4>
+                    <div class="code-block">[
+    {
+        "id": 1,
+        "name": "Restaurants",
+        "description": "Food and dining services"
+    },
+    {
+        "id": 2,
+        "name": "Entertainment",
+        "description": "Fun activities and events"
+    }
+]</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="page-break"></div>
+
+        <section id="services" class="section">
+            <h2>5. Services</h2>
+            <p>Comprehensive service management endpoints for both customers and service providers.</p>
+
+            <h3>5.1 Customer Endpoints</h3>
+
+            <div class="endpoint">
+                <div class="endpoint-header">Service Feed</div>
+                <div class="endpoint-content">
+                    <span class="method GET">GET</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v2/service/feed</div>
+                    <p>Returns a paginated list of available services.</p>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">Popular Services</div>
+                <div class="endpoint-content">
+                    <span class="method GET">GET</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v2/service/feed/popular</div>
+                    <p>Returns a list of popular services based on bookings and ratings.</p>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">Featured Services</div>
+                <div class="endpoint-content">
+                    <span class="method GET">GET</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v2/service/feed/featured</div>
+                    <p>Returns a list of featured services promoted by the platform.</p>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">Discounted Services</div>
+                <div class="endpoint-content">
+                    <span class="method GET">GET</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v2/service/feed/discounted</div>
+                    <p>Returns a list of services currently offering discounts.</p>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">Service Details</div>
+                <div class="endpoint-content">
+                    <span class="method GET">GET</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v2/service/details/{id}</div>
+                    <p>Returns detailed information about a specific service.</p>
+                    
+                    <h4>Path Parameters</h4>
+                    <table class="params-table">
+                        <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                        <tr><td>id</td><td>integer</td><td>Service ID</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">Search Services</div>
+                <div class="endpoint-content">
+                    <span class="method GET">GET</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v2/service/search?q={query}</div>
+                    <p>Search for services by name or description.</p>
+                    
+                    <h4>Query Parameters</h4>
+                    <table class="params-table">
+                        <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                        <tr><td>q</td><td>string</td><td>Search query</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">Price Calculation</div>
+                <div class="endpoint-content">
+                    <span class="method POST">POST</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v2/service/price-calculate</div>
+                    <p>Calculate the total price for a service based on the number of people.</p>
+                    
+                    <h4>Request Body (JSON)</h4>
+                    <div class="code-block">{
+    "service_id": 1,
+    "people_count": 10
+}</div>
+
+                    <h4>Parameters</h4>
+                    <table class="params-table">
+                        <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+                        <tr><td>service_id</td><td>integer</td><td>Yes</td><td>ID of the service</td></tr>
+                        <tr><td>people_count</td><td>integer</td><td>Yes</td><td>Number of people</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <h3>5.2 Service Provider Endpoints</h3>
+
+            <div class="endpoint">
+                <div class="endpoint-header">Create Service</div>
+                <div class="endpoint-content">
+                    <span class="method POST">POST</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v2/service/provider/services</div>
+                    <p><strong>Authentication Required:</strong> Yes (Service Provider)</p>
+                    <p><strong>Content-Type:</strong> multipart/form-data</p>
+                    
+                    <h4>Form Parameters</h4>
+                    <table class="params-table">
+                        <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+                        <tr><td>name</td><td>string</td><td>Yes</td><td>Service name</td></tr>
+                        <tr><td>description</td><td>string</td><td>Yes</td><td>Service description</td></tr>
+                        <tr><td>category</td><td>integer</td><td>Yes</td><td>Category ID</td></tr>
+                        <tr><td>city</td><td>integer</td><td>Yes</td><td>City ID</td></tr>
+                        <tr><td>base_price</td><td>decimal</td><td>Yes</td><td>Base price</td></tr>
+                        <tr><td>price_per_person</td><td>decimal</td><td>Yes</td><td>Additional price per person</td></tr>
+                        <tr><td>location</td><td>string</td><td>Yes</td><td>Service location</td></tr>
+                        <tr><td>images</td><td>file[]</td><td>No</td><td>Service images</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">Manage Service</div>
+                <div class="endpoint-content">
+                    <span class="method GET">GET</span> <span class="method PUT">PUT</span> <span class="method DELETE">DELETE</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v2/service/provider/services/{id}</div>
+                    <p><strong>Authentication Required:</strong> Yes (Service Provider)</p>
+                    
+                    <ul>
+                        <li><strong>GET:</strong> Retrieve service details</li>
+                        <li><strong>PUT:</strong> Update service information</li>
+                        <li><strong>DELETE:</strong> Delete the service</li>
+                    </ul>
+
+                    <h4>Path Parameters</h4>
+                    <table class="params-table">
+                        <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                        <tr><td>id</td><td>integer</td><td>Service ID</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">Provider Statistics</div>
+                <div class="endpoint-content">
+                    <span class="method GET">GET</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v2/service/provider/stats</div>
+                    <p><strong>Authentication Required:</strong> Yes (Service Provider)</p>
+                    <p>Returns statistics for the authenticated service provider including total bookings, revenue, etc.</p>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">Provider Orders</div>
+                <div class="endpoint-content">
+                    <span class="method GET">GET</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v2/service/provider/orders</div>
+                    <p><strong>Authentication Required:</strong> Yes (Service Provider)</p>
+                    <p>Returns a list of orders for the authenticated service provider's services.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="page-break"></div>
+
+        <section id="orders" class="section">
+            <h2>6. Orders</h2>
+            <p>Order management endpoints for creating and tracking bookings.</p>
+
+            <div class="endpoint">
+                <div class="endpoint-header">Create Order</div>
+                <div class="endpoint-content">
+                    <span class="method POST">POST</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v3/order/create</div>
+                    <p>Create a new order for a service.</p>
+                    
+                    <h4>Request Body (JSON)</h4>
+                    <div class="code-block">{
+    "service": 1,
+    "customer_name": "John Doe",
+    "customer_email": "john.doe@example.com",
+    "customer_phone": "5577102932",
+    "customer_country": "georgia",
+    "people_count": 10,
+    "service_date": "2025-07-20 18:30:00"
+}</div>
+
+                    <h4>Parameters</h4>
+                    <table class="params-table">
+                        <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+                        <tr><td>service</td><td>integer</td><td>Yes</td><td>Service ID</td></tr>
+                        <tr><td>customer_name</td><td>string</td><td>Yes</td><td>Customer's full name</td></tr>
+                        <tr><td>customer_email</td><td>string</td><td>Yes</td><td>Customer's email</td></tr>
+                        <tr><td>customer_phone</td><td>string</td><td>Yes</td><td>Customer's phone number</td></tr>
+                        <tr><td>customer_country</td><td>string</td><td>Yes</td><td>Customer's country</td></tr>
+                        <tr><td>people_count</td><td>integer</td><td>Yes</td><td>Number of people</td></tr>
+                        <tr><td>service_date</td><td>datetime</td><td>Yes</td><td>Preferred service date and time (YYYY-MM-DD HH:MM:SS)</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">Order Feed</div>
+                <div class="endpoint-content">
+                    <span class="method GET">GET</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v3/order/feed</div>
+                    <p><strong>Authentication Required:</strong> Yes</p>
+                    <p>Returns a list of orders for the authenticated user.</p>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">Order Details</div>
+                <div class="endpoint-content">
+                    <span class="method GET">GET</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v3/order/details/{id}</div>
+                    <p><strong>Authentication Required:</strong> Yes</p>
+                    <p>Returns detailed information about a specific order.</p>
+                    
+                    <h4>Path Parameters</h4>
+                    <table class="params-table">
+                        <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                        <tr><td>id</td><td>integer</td><td>Order ID</td></tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <div class="page-break"></div>
+
+        <section id="payments" class="section">
+            <h2>7. Payments</h2>
+            <p>Payment processing endpoints using Bank of Georgia (BOG) payment gateway.</p>
+
+            <div class="endpoint">
+                <div class="endpoint-header">Initiate BOG Payment</div>
+                <div class="endpoint-content">
+                    <span class="method POST">POST</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v3/payment/bog/initiate/</div>
+                    <p>Initiate a payment transaction through Bank of Georgia.</p>
+                    
+                    <h4>Request Body (JSON)</h4>
+                    <div class="code-block">{
+    "order_id": "123211"
+}</div>
+
+                    <h4>Parameters</h4>
+                    <table class="params-table">
+                        <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+                        <tr><td>order_id</td><td>string</td><td>Yes</td><td>Order ID to process payment for</td></tr>
+                    </table>
+
+                    <h4>Response</h4>
+                    <p>Returns a payment URL where the customer should be redirected to complete the payment.</p>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">BOG Payment Callback</div>
+                <div class="endpoint-content">
+                    <span class="method GET">GET</span>
+                    <div class="url">https://admin.discount.com.ge/en/api/v3/payment/bog/callback/</div>
+                    <p>Webhook endpoint for Bank of Georgia payment notifications. This endpoint is called by BOG to notify about payment status changes.</p>
+                    
+                    <h4>Query Parameters</h4>
+                    <p>Parameters will be provided by Bank of Georgia based on their API specification.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="page-break"></div>
+
+        <section class="section">
+            <h2>8. Error Handling</h2>
+            <p>The API uses standard HTTP status codes to indicate the success or failure of requests.</p>
+            
+            <h3>HTTP Status Codes</h3>
+            <table class="params-table">
+                <tr><th>Code</th><th>Status</th><th>Description</th></tr>
+                <tr><td>200</td><td>OK</td><td>Request successful</td></tr>
+                <tr><td>201</td><td>Created</td><td>Resource created successfully</td></tr>
+                <tr><td>400</td><td>Bad Request</td><td>Invalid request parameters</td></tr>
+                <tr><td>401</td><td>Unauthorized</td><td>Authentication required</td></tr>
+                <tr><td>403</td><td>Forbidden</td><td>Access denied</td></tr>
+                <tr><td>404</td><td>Not Found</td><td>Resource not found</td></tr>
+                <tr><td>500</td><td>Internal Server Error</td><td>Server error</td></tr>
+            </table>
+
+            <h3>Error Response Format</h3>
+            <div class="code-block">{
+    "error": true,
+    "message": "Error description",
+    "code": "ERROR_CODE",
+    "details": {
+        "field": ["Field-specific error message"]
+    }
+}</div>
+        </section>
+
+        <section class="section">
+            <h2>9. Rate Limiting</h2>
+            <p>The API implements rate limiting to ensure fair usage. Limits may vary by endpoint and user type.</p>
+            
+            <h3>Rate Limit Headers</h3>
+            <ul>
+                <li><code>X-RateLimit-Limit</code>: Maximum number of requests allowed</li>
+                <li><code>X-RateLimit-Remaining</code>: Number of requests remaining</li>
+                <li><code>X-RateLimit-Reset</code>: Time when rate limit resets</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2>10. Support</h2>
+            <p>For technical support and API questions, please contact:</p>
+            <ul>
