@@ -182,7 +182,6 @@ DATABASES = {
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'accounts.middleware.CustomSessionAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
 }

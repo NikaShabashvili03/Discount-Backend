@@ -1,10 +1,10 @@
 import django_filters
 from django_filters import rest_framework as filters
-from ..models import Service
+from ..models import Event
 from services.models.category import Category
 from services.models.city import City
 
-class ServiceFilter(django_filters.FilterSet):
+class EventFilter(django_filters.FilterSet):
     min_price = django_filters.NumberFilter(field_name='base_price', lookup_expr='gte')
     max_price = django_filters.NumberFilter(field_name='base_price', lookup_expr='lte')
     
@@ -27,9 +27,9 @@ class ServiceFilter(django_filters.FilterSet):
     is_popular = django_filters.BooleanFilter()
     is_featured = django_filters.BooleanFilter()
     
-    provider = django_filters.NumberFilter(field_name='provider__id')
-    provider_name = django_filters.CharFilter(
-        field_name='provider__company_name', 
+    company = django_filters.NumberFilter(field_name='company__id')
+    company_name = django_filters.CharFilter(
+        field_name='company_name', 
         lookup_expr='icontains'
     )
     
@@ -46,7 +46,7 @@ class ServiceFilter(django_filters.FilterSet):
     # radius = django_filters.NumberFilter(method='filter_by_distance')
     
     class Meta:
-        model = Service
+        model = Event
         fields = {
             'name': ['exact', 'icontains'],
             'base_price': ['exact', 'gte', 'lte'],

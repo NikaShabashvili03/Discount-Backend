@@ -2,7 +2,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path('city/', include('services.urls.city')),
+    path('country/', include('services.urls.country')),
     path('category/', include('services.urls.category')),
-    path('service/', include('services.urls.service')),
-    path('events/', include('services.urls.event'))
+    path('event/', include('services.urls.event')),
 ]

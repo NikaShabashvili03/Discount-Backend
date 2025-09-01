@@ -1,6 +1,6 @@
 from django.db import models
-from accounts.models import User
-from services.models import Service
+from accounts.models import Customer
+from services.models import Event
 
 class Order(models.Model):
     STATUS_CHOICES = [
@@ -20,13 +20,12 @@ class Order(models.Model):
     order_number = models.CharField(max_length=20, unique=True)
     
     customer = models.ForeignKey(
-        User, 
+        Customer, 
         on_delete=models.CASCADE, 
         related_name='orders',
-        limit_choices_to={'user_type__in': ['customer', 'Customer']}
     )
 
-    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='orders')
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='orders')
     
     customer_name = models.CharField(max_length=200)
     customer_email = models.EmailField()
@@ -34,7 +33,7 @@ class Order(models.Model):
     customer_country = models.CharField(max_length=100)
     
     people_count = models.IntegerField()
-    service_date = models.DateTimeField()
+    event_date = models.DateTimeField()
     notes = models.TextField(blank=True)
     
     base_price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -52,7 +51,7 @@ class Order(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
-        return f"Order {self.order_number} - {self.service.name}"
+        return f"Order {self.order_number} - {self.event.name}"
     
     def save(self, *args, **kwargs):
         if not self.order_number:

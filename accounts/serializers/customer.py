@@ -1,26 +1,26 @@
 from rest_framework import serializers
-from ..models import User
+from ..models import Customer
 
-class UserSerializer(serializers.ModelSerializer):
+class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User 
+        model = Customer
         fields = ['id', 'firstname', 'lastname', 'email']
 
-class UserLoginSerializer(serializers.Serializer):
+class CustomerLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
     
     def validate(self, data):
         try:
-            user = User.objects.get(email=data['email'])
-            if user.check_password(data['password']):
-                return user
+            customer = Customer.objects.get(email=data['email'])
+            if customer.check_password(data['password']):
+                return customer
             else:
                 raise serializers.ValidationError("Invalid credentials")
-        except User.DoesNotExist:
-            raise serializers.ValidationError("User does not exist")
+        except Customer.DoesNotExist:
+            raise serializers.ValidationError("Customer does not exist")
         
-class UserRegisterSerializer(serializers.Serializer):
+class CustomerRegisterSerializer(serializers.Serializer):
     firstname = serializers.CharField(write_only=True)
     lastname = serializers.CharField(write_only=True)
     country = serializers.CharField(write_only=True)
@@ -30,12 +30,12 @@ class UserRegisterSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
     
     def validate_email(self, email):
-        if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError("A user with this email already exists.")
+        if Customer.objects.filter(email=email).exists():
+            raise serializers.ValidationError("A customer with this email already exists.")
         return email
     
     def create(self, validated_data):
-        user = User.objects.create(
+        customer = Customer.objects.create(
             email=validated_data['email'],
             password=validated_data['password'],
             firstname=validated_data['firstname'],
@@ -44,4 +44,4 @@ class UserRegisterSerializer(serializers.Serializer):
             mobile=validated_data['mobile']
         )
 
-        return user
+        return customer

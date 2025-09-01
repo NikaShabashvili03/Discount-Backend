@@ -1,5 +1,4 @@
 from .city import City
-from .service import Service, ServiceProvider, ServiceImage, Discount
+from .event import Event, EventImage, Discount
 from .category import Category
-from .event import Event, KeyWord, Rating
-
+from .country import Country

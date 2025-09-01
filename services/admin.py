@@ -1,11 +1,11 @@
 from django.contrib import admin
-from services.models import Category, City, ServiceProvider, Service, ServiceImage, Discount
+from services.models import Category, City, Event, EventImage, Discount, Country
 
 
 
 admin.site.register(Category)
 admin.site.register(City)
-admin.site.register(ServiceProvider)
-admin.site.register(Service)
-admin.site.register(ServiceImage)
+admin.site.register(Event)
+admin.site.register(EventImage)
 admin.site.register(Discount)
+admin.site.register(Country)

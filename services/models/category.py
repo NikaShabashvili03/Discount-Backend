@@ -10,6 +10,7 @@ class Category(models.Model):
     description = models.TextField(blank=True)
     icon = models.ImageField(upload_to=upload_category_icon, null=True, blank=True)
     is_active = models.BooleanField(default=True)
+    color = models.CharField(max_length=50, blank=True, null=True)
     order = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
