@@ -119,3 +119,9 @@ class CompanyCreateUpdateView(APIView):
             return Response(data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class StaffAdminListView(generics.ListAPIView):
+    permission_classes = [IsAdminAuthenticated]
+    authentication_classes = [AdminSessionMiddleware]
+    serializer_class = StaffSerializer
+    queryset = Staff.objects.all()

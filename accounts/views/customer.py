@@ -1,13 +1,13 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from ..permissions import AllowAny, IsCustomerAuthenticated
+from ..permissions import AllowAny, IsCustomerAuthenticated, IsAdminAuthenticated
 from ..serializers.customer import CustomerSerializer, CustomerLoginSerializer, CustomerRegisterSerializer
-from ..middleware import CustomerSessionMiddleware
+from ..middleware import CustomerSessionMiddleware, AdminSessionMiddleware
 from django.middleware.csrf import get_token
 import uuid
 from django.utils.timezone import now
 from datetime import timedelta
-from ..models import CustomerSession, BlackList
+from ..models import CustomerSession, BlackList, Customer
 from ..utils import get_client_ip
 
 class RegisterView(generics.GenericAPIView):
@@ -109,3 +109,10 @@ class LogoutView(generics.GenericAPIView):
             response = Response({'details': 'Invalid session token'}, status=status.HTTP_400_BAD_REQUEST)
             
         return response
+    
+
+class CustomerAdminListView(generics.ListAPIView):
+    permission_classes = [IsAdminAuthenticated]
+    authentication_classes = [AdminSessionMiddleware]
+    serializer_class = CustomerSerializer
+    queryset = Customer.objects.all()

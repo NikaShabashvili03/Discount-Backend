@@ -149,15 +149,21 @@ CORS_ALLOW_METHODS = ['*']
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'https://admin.discount.com.ge',
+    'https://discount.com.ge'
 ]
 
 ALLOWED_HOSTS = [
     '127.0.0.1', 
     'localhost',
+    'admin.discount.com.ge',
+    'discount.com.ge'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
+    'https://admin.discount.com.ge',
+    'https://discount.com.ge'
 ]
 
 SESSION_COOKIE_SECURE = False

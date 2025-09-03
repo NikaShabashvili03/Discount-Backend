@@ -1,5 +1,5 @@
 from django.urls import path
-from ..views.event import EventDetailView, EventListView, PopularEventsView, FeaturedEventsView, DiscountedEventsView, CompanyEventListView, CompanyEventDetailView, SearchView, CompanyOrderListView, PriceCalculationView
+from ..views.event import EventDetailView, EventListView, PopularEventsView, FeaturedEventsView, DiscountedEventsView, CompanyEventListView, CompanyEventDetailView, SearchView, CompanyOrderListView, PriceCalculationView, AdminEventCreateView
 
 urlpatterns = [
     path('feed', EventListView.as_view(), name='event-list'),
@@ -14,4 +14,6 @@ urlpatterns = [
     path('company/events', CompanyEventListView.as_view(), name='company-event-list'),
     path('company/events/<int:pk>', CompanyEventDetailView.as_view(), name='company-event-detail'),
     path('company/orders', CompanyOrderListView.as_view(), name='company-order-list'),
+
+    path('admin/event/create', AdminEventCreateView.as_view(), name='company-create-admin')
 ]

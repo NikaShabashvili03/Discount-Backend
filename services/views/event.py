@@ -7,11 +7,11 @@ from django.utils import timezone
 from datetime import timedelta
 from decimal import Decimal
 from ..models import Event
-from ..serializer.event import EventListSerializer, EventDetailSerializer, EventCreateUpdateSerializer, PriceCalculationSerializer, EventStatsSerializer
+from ..serializer.event import EventListSerializer, EventDetailSerializer, EventCreateUpdateSerializer, PriceCalculationSerializer, AdminEventCreateSerializer
 from ..filters.event import EventFilter
 from accounts.models.staff import Company
-from accounts.permissions import IsStaffAuthenticated
-from accounts.middleware import StaffSessionMiddleware
+from accounts.permissions import IsStaffAuthenticated, IsAdminAuthenticated
+from accounts.middleware import StaffSessionMiddleware, AdminSessionMiddleware
 from orders.models import Order
 from orders.serializers.order import OrderSerializer
 from django.shortcuts import get_object_or_404
@@ -76,6 +76,17 @@ class DiscountedEventsView(generics.ListAPIView):
             discounts__start_date__lte=now,
             discounts__end_date__gte=now
         ).distinct().select_related('category', 'city', 'company')
+    
+# Admin Add Event
+class AdminEventCreateView(APIView):
+    permission_classes = [IsAdminAuthenticated]
+    authentication_classes = [AdminSessionMiddleware]
+
+    def post(self, request, *args, **kwargs):
+        serializer = AdminEventCreateSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        event = serializer.save()
+        return Response(EventDetailSerializer(event).data, status=status.HTTP_201_CREATED)
     
 # Company Events
 class CompanyEventListView(generics.ListCreateAPIView):

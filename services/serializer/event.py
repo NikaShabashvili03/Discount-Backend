@@ -4,6 +4,7 @@ from .category import CategorySerializer
 from accounts.models.staff import Company
 from .city import CitySerializer
 from decimal import Decimal
+from django.shortcuts import get_object_or_404
 
 class EventImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -81,6 +82,29 @@ class EventCreateUpdateSerializer(serializers.ModelSerializer):
         validated_data['company'] = company
         return super().create(validated_data)
 
+class AdminEventCreateSerializer(serializers.ModelSerializer):
+    images = EventImageSerializer(many=True, read_only=True)
+    company_id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = Event
+        fields = [
+            'company_id',
+            'name', 'description',
+            'category', 'city',
+            'base_price', 'price_per_person',
+            'min_people', 'max_people',
+            'location', 'latitude', 'longitude',
+            'is_popular', 'is_featured',
+            'images'
+        ]
+
+    def create(self, validated_data):
+        company_id = validated_data.pop('company_id')
+        company = get_object_or_404(Company, id=company_id)
+        validated_data['company'] = company
+        return super().create(validated_data)
+    
 class ProviderStatsSerializer(serializers.Serializer):
     total_events = serializers.IntegerField()
     total_orders = serializers.IntegerField()
@@ -97,8 +121,6 @@ class EventStatsSerializer(serializers.Serializer):
     total_revenue = serializers.DecimalField(max_digits=10, decimal_places=2)
     average_rating = serializers.DecimalField(max_digits=3, decimal_places=2, allow_null=True)
     views_count = serializers.IntegerField()
-
-
 
 
 class PriceCalculationSerializer(serializers.Serializer):

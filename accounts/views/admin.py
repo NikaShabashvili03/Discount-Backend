@@ -7,7 +7,7 @@ from django.middleware.csrf import get_token
 import uuid
 from django.utils.timezone import now
 from datetime import timedelta
-from ..models import AdminSession, BlackList
+from ..models import AdminSession, Admin
 from ..utils import get_client_ip
 
 class AdminCreateView(generics.GenericAPIView):
@@ -86,3 +86,11 @@ class LogoutView(generics.GenericAPIView):
             response = Response({'details': 'Invalid session token'}, status=status.HTTP_400_BAD_REQUEST)
             
         return response
+    
+class AdminListView(generics.ListAPIView):
+    permission_classes = [IsAdminAuthenticated]
+    authentication_classes = [AdminSessionMiddleware]
+    serializer_class = AdminSerializer
+
+    def get_queryset(self):
+        return Admin.objects.exclude(id=self.request.admin.id)
