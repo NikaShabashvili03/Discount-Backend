@@ -1,6 +1,7 @@
 from django.db import models
 from ..utils import image_upload, validate_image
 from django.core.exceptions import ValidationError
+from staff.models import Company
 
 def upload_category_icon(instance, filename):
     return image_upload(instance, filename, 'category_icons/')
@@ -28,3 +29,7 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+class CompanyCategory(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="companies")
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="categories")

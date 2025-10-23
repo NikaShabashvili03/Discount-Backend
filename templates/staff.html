@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discount Staff API Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            margin-bottom: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .base-url {
+            background: rgba(255,255,255,0.2);
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-family: monospace;
+        }
+
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8eaf6;
+        }
+
+        .endpoint {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .method {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+        }
+
+        .method.get { background: #10b981; color: white; }
+        .method.post { background: #3b82f6; color: white; }
+        .method.patch { background: #f59e0b; color: white; }
+        .method.put { background: #8b5cf6; color: white; }
+        .method.delete { background: #ef4444; color: white; }
+
+        .endpoint-url {
+            font-family: monospace;
+            flex: 1;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+
+        .endpoint-name {
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .params-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .params-table th,
+        .params-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .params-table th {
+            background: #f3f4f6;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .label {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #e0e7ff;
+            color: #4338ca;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        .description {
+            margin-top: 10px;
+            color: #6b7280;
+        }
+
+        nav {
+            position: sticky;
+            top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        nav h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        nav ul {
+            list-style: none;
+        }
+
+        nav li {
+            margin-bottom: 8px;
+        }
+
+        nav a {
+            color: #4b5563;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .endpoint-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .endpoint-url {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Discount Staff API</h1>
+            <p class="subtitle">REST API Documentation v2</p>
+            <div class="base-url">Base URL: http://localhost:8000</div>
+        </header>
+
+        <nav>
+            <h3>Quick Navigation</h3>
+            <ul>
+                <li><a href="#auth">Authentication</a></li>
+                <li><a href="#category">Category</a></li>
+                <li><a href="#country">Country</a></li>
+                <li><a href="#city">City</a></li>
+                <li><a href="#event">Event</a></li>
+            </ul>
+        </nav>
+
+        <div id="auth" class="section">
+            <h2>Authentication</h2>
+            <p class="description">Endpoints for user authentication and session management.</p>
+
+            <div class="endpoint">
+                <div class="endpoint-name">Login</div>
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-url">/en/api/v2/auth/login</span>
+                </div>
+                <div class="label">Request Body</div>
+                <div class="code-block">
+<pre>{
+  "email": "shabashvilinika@yahoo.com",
+  "password": "123"
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-name">Get Profile</div>
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/en/api/v2/auth/profile</span>
+                </div>
+                <p class="description">Retrieve the authenticated user's profile information.</p>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-name">Logout</div>
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-url">/en/api/v2/auth/logout</span>
+                </div>
+                <p class="description">End the current user session.</p>
+            </div>
+        </div>
+
+        <div id="category" class="section">
+            <h2>Category</h2>
+            <p class="description">Manage event categories.</p>
+
+            <div class="endpoint">
+                <div class="endpoint-name">List Categories</div>
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/en/api/v2/category/list</span>
+                </div>
+                <div class="label">Query Parameters</div>
+                <table class="params-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>company_id</td>
+                            <td>integer</td>
+                            <td>Filter categories by company ID</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="country" class="section">
+            <h2>Country</h2>
+            <p class="description">Retrieve available countries.</p>
+
+            <div class="endpoint">
+                <div class="endpoint-name">List Countries</div>
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/api/v2/country/list</span>
+                </div>
+                <p class="description">Get a list of all available countries.</p>
+            </div>
+        </div>
+
+        <div id="city" class="section">
+            <h2>City</h2>
+            <p class="description">Retrieve available cities.</p>
+
+            <div class="endpoint">
+                <div class="endpoint-name">List Cities</div>
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/api/v2/city/list</span>
+                </div>
+                <p class="description">Get a list of all available cities.</p>
+            </div>
+        </div>
+
+        <div id="event" class="section">
+            <h2>Event</h2>
+            <p class="description">Create, manage, and retrieve events.</p>
+
+            <div class="endpoint">
+                <div class="endpoint-name">List Events</div>
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/en/api/v2/event/{company_id}/list</span>
+                </div>
+                <p class="description">Retrieve all events for a specific company.</p>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-name">Create Event</div>
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-url">/en/api/v2/event/{company_id}/create</span>
+                </div>
+                <div class="label">Request Body</div>
+                <div class="code-block">
+<pre>{
+  "name": "Event Name",
+  "description": "Event Description",
+  "category": 3,
+  "city": 3,
+  "base_price": 211,
+  "price_per_person": 100,
+  "location": "8"
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-name">Event Details</div>
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/en/api/v2/event/details/{event_id}</span>
+                </div>
+                <p class="description">Get detailed information about a specific event.</p>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-name">List Orders</div>
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/en/api/v2/event/orders/{event_id}</span>
+                </div>
+                <p class="description">Retrieve all orders for a specific event.</p>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-name">Update Event</div>
+                <div class="endpoint-header">
+                    <span class="method patch">PATCH</span>
+                    <span class="endpoint-url">/en/api/v2/event/update/{event_id}</span>
+                </div>
+                <div class="label">Request Body</div>
+                <div class="code-block">
+<pre>{
+  "name": "Updated Name",
+  "description": "Updated Description",
+  "category": 1,
+  "city": 3,
+  "base_price": 211,
+  "price_per_person": 100,
+  "location": "8"
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-name">Delete Event</div>
+                <div class="endpoint-header">
+                    <span class="method delete">DELETE</span>
+                    <span class="endpoint-url">/en/api/v2/event/delete/{event_id}</span>
+                </div>
+                <p class="description">Permanently delete an event.</p>
+            </div>
+
+            <h3 style="margin-top: 40px; margin-bottom: 20px; color: #667eea;">Event Images</h3>
+
+            <div class="endpoint">
+                <div class="endpoint-name">Upload Image</div>
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-url">/en/api/v2/event/{company_id}/images</span>
+                </div>
+                <div class="label">Form Data</div>
+                <table class="params-table">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>image</td>
+                            <td>file</td>
+                            <td>Image file to upload</td>
+                        </tr>
+                        <tr>
+                            <td>alt_text</td>
+                            <td>string</td>
+                            <td>Alternative text for the image</td>
+                        </tr>
+                        <tr>
+                            <td>is_primary</td>
+                            <td>boolean</td>
+                            <td>Set as primary image</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-name">Update Image</div>
+                <div class="endpoint-header">
+                    <span class="method put">PUT</span>
+                    <span class="endpoint-url">/en/api/v2/event/{company_id}/images/update/{image_id}</span>
+                </div>
+                <p class="description">Update an existing event image.</p>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-name">Delete Image</div>
+                <div class="endpoint-header">
+                    <span class="method delete">DELETE</span>
+                    <span class="endpoint-url">/en/api/v2/event/{company_id}/images/delete/{image_id}</span>
+                </div>
+                <p class="description">Remove an image from an event.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

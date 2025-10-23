@@ -1,5 +1,5 @@
 from django.db import models
-from accounts.models import Company
+from staff.models import Company
 from decimal import Decimal
 from django.core.validators import MinValueValidator, MaxValueValidator
 from services.models.category import Category
@@ -60,7 +60,7 @@ class Event(models.Model):
     
 
 class EventImage(models.Model):
-    service = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='images')
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to=upload_service_image)
     alt_text = models.CharField(max_length=200, blank=True)
     is_primary = models.BooleanField(default=False)
@@ -79,7 +79,7 @@ class EventImage(models.Model):
         ordering = ['order', 'created_at']
 
     def __str__(self):
-        return f"{self.service.name} | {self.alt_text} | {self.image}"
+        return f"{self.event.name} | {self.alt_text} | {self.image}"
 
 class Discount(models.Model):
     DISCOUNT_TYPES = [

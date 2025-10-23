@@ -1,17 +1,25 @@
 from ..serializers.order import OrderCreateSerializer, OrderSerializer
 from ..models import Order
 from rest_framework import generics, permissions
-from accounts.permissions import IsCustomerAuthenticated
-from accounts.middleware import CustomerSessionMiddleware
-    
+from customer.permissions import IsCustomerAuthenticated
+from customer.middleware import CustomerSessionMiddleware
+from rest_framework.response import Response
 
 class OrderCreateView(generics.CreateAPIView):
     serializer_class = OrderCreateSerializer
     permission_classes = [permissions.AllowAny]
     authentication_classes = [CustomerSessionMiddleware]
-    
+
     def perform_create(self, serializer):
-        serializer.save()
+        self.order = serializer.save() 
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        detailed_data = OrderSerializer(self.order, context={'request': request}).data
+        return Response(detailed_data, status=201)
 
 class OrderListView(generics.ListAPIView):
     serializer_class = OrderSerializer

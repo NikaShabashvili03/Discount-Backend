@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from services.models import Event
-from services.serializer.event import EventListSerializer
-from accounts.serializers.admin import AdminSerializer
+from services.serializers.event import EventListSerializer
+from panel.serializers.admin import AdminSerializer
 from ..models import Order
 from decimal import Decimal
 

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discount Customer API Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .nav {
+            background: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #764ba2;
+        }
+
+        .content {
+            padding: 3rem 0;
+        }
+
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 4px;
+        }
+
+        .endpoint h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+        }
+
+        .method.get {
+            background: #28a745;
+            color: white;
+        }
+
+        .method.post {
+            background: #007bff;
+            color: white;
+        }
+
+        .url {
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 0.5rem 0;
+            border: 1px solid #e0e0e0;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .param-table th,
+        .param-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .param-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .param-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196f3;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            background: #e7f3ff;
+            color: #0366d6;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Discount Customer API</h1>
+            <p class="subtitle">Complete API reference for event discovery and management</p>
+        </div>
+    </div>
+
+    <nav class="nav">
+        <div class="container">
+            <div class="nav-links">
+                <a href="#auth">Authentication</a>
+                <a href="#category">Categories</a>
+                <a href="#country">Countries</a>
+                <a href="#city">Cities</a>
+                <a href="#events">Events</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="content">
+        <div class="container">
+            <div class="section">
+                <h2>Getting Started</h2>
+                <p>The Discount Customer API provides access to events, categories, and location data. The base URL for all API requests is:</p>
+                <div class="code-block">http://localhost:8000/{locale}/api/v3/</div>
+                <div class="info-box">
+                    <strong>Locale Support:</strong> The API supports multiple locales. Replace <code>{locale}</code> with your desired language code (e.g., <code>en</code>, <code>tr</code>).
+                </div>
+            </div>
+
+            <div class="section" id="auth">
+                <h2>Authentication</h2>
+                <p>Authentication endpoints for user registration, login, and profile management.</p>
+
+                <div class="endpoint">
+                    <h3><span class="method post">POST</span> Login</h3>
+                    <div class="url">http://localhost:8000/en/api/v3/auth/login</div>
+                    <p><strong>Description:</strong> Authenticate a user and receive a session token.</p>
+                    
+                    <h4>Request Body:</h4>
+                    <div class="code-block">{
+  "email": "customer@gmail.com",
+  "password": "123"
+}</div>
+
+                    <h4>Response:</h4>
+                    <p>Returns a session token stored in cookies (<code>customer_session_token</code>).</p>
+                </div>
+
+                <div class="endpoint">
+                    <h3><span class="method post">POST</span> Register</h3>
+                    <div class="url">http://localhost:8000/en/api/v3/auth/register</div>
+                    <p><strong>Description:</strong> Create a new customer account.</p>
+                    
+                    <h4>Request Body:</h4>
+                    <div class="code-block">{
+  "email": "customer@gmail.com",
+  "password": "123",
+  "firstname": "nika",
+  "lastname": "shabashvili",
+  "country": "geo",
+  "mobile": "577123"
+}</div>
+
+                    <table class="param-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>email</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>User's email address</td>
+                            </tr>
+                            <tr>
+                                <td>password</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>User's password</td>
+                            </tr>
+                            <tr>
+                                <td>firstname</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>User's first name</td>
+                            </tr>
+                            <tr>
+                                <td>lastname</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>User's last name</td>
+                            </tr>
+                            <tr>
+                                <td>country</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Country code</td>
+                            </tr>
+                            <tr>
+                                <td>mobile</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Mobile phone number</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="endpoint">
+                    <h3><span class="method get">GET</span> Profile</h3>
+                    <div class="url">http://localhost:8000/en/api/v3/auth/profile</div>
+                    <p><strong>Description:</strong> Retrieve the authenticated user's profile information.</p>
+                    <div class="warning-box">
+                        <strong>Authentication Required:</strong> This endpoint requires a valid session token.
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <h3><span class="method post">POST</span> Logout</h3>
+                    <div class="url">http://localhost:8000/en/api/v3/auth/logout</div>
+                    <p><strong>Description:</strong> End the user's session and invalidate the session token.</p>
+                </div>
+            </div>
+
+            <div class="section" id="category">
+                <h2>Categories</h2>
+                
+                <div class="endpoint">
+                    <h3><span class="method get">GET</span> List Categories</h3>
+                    <div class="url">http://localhost:8000/en/api/v3/category/list</div>
+                    <p><strong>Description:</strong> Retrieve a list of all event categories.</p>
+                    <span class="badge">No Authentication Required</span>
+                </div>
+            </div>
+
+            <div class="section" id="country">
+                <h2>Countries</h2>
+                
+                <div class="endpoint">
+                    <h3><span class="method get">GET</span> List Countries</h3>
+                    <div class="url">http://localhost:8000/api/v3/country/list</div>
+                    <p><strong>Description:</strong> Retrieve a list of all available countries.</p>
+                    <span class="badge">No Authentication Required</span>
+                    <div class="info-box">
+                        <strong>Note:</strong> This endpoint does not include a locale prefix in the URL.
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" id="city">
+                <h2>Cities</h2>
+                
+                <div class="endpoint">
+                    <h3><span class="method get">GET</span> List Cities</h3>
+                    <div class="url">http://localhost:8000/api/v3/city/list</div>
+                    <p><strong>Description:</strong> Retrieve a list of all available cities.</p>
+                    <span class="badge">No Authentication Required</span>
+                    <div class="info-box">
+                        <strong>Note:</strong> This endpoint does not include a locale prefix in the URL.
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" id="events">
+                <h2>Events</h2>
+                <p>Comprehensive event discovery and management endpoints.</p>
+
+                <div class="endpoint">
+                    <h3><span class="method get">GET</span> Event Feed</h3>
+                    <div class="url">http://localhost:8000/tr/api/v3/event/feed</div>
+                    <p><strong>Description:</strong> Retrieve the main feed of events.</p>
+                    <span class="badge">No Authentication Required</span>
+                </div>
+
+                <div class="endpoint">
+                    <h3><span class="method get">GET</span> Event Details</h3>
+                    <div class="url">http://localhost:8000/en/api/v3/event/details/{id}</div>
+                    <p><strong>Description:</strong> Retrieve detailed information about a specific event.</p>
+                    
+                    <h4>Path Parameters:</h4>
+                    <table class="param-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>id</td>
+                                <td>integer</td>
+                                <td>The unique identifier of the event</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h4>Example:</h4>
+                    <div class="code-block">GET http://localhost:8000/en/api/v3/event/details/1</div>
+                </div>
+
+                <div class="endpoint">
+                    <h3><span class="method get">GET</span> Search Events</h3>
+                    <div class="url">http://localhost:8000/en/api/v3/event/search?q={query}</div>
+                    <p><strong>Description:</strong> Search for events by keyword.</p>
+                    
+                    <h4>Query Parameters:</h4>
+                    <table class="param-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>q</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Search query string</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h4>Example:</h4>
+                    <div class="code-block">GET http://localhost:8000/en/api/v3/event/search?q=concert</div>
+                </div>
+
+                <div class="endpoint">
+                    <h3><span class="method get">GET</span> Discounted Events</h3>
+                    <div class="url">http://localhost:8000/en/api/v3/event/feed/discounted</div>
+                    <p><strong>Description:</strong> Retrieve events that currently have discounts available.</p>
+                    <span class="badge">No Authentication Required</span>
+                </div>
+
+                <div class="endpoint">
+                    <h3><span class="method get">GET</span> Featured Events</h3>
+                    <div class="url">http://localhost:8000/en/api/v3/event/feed/featured</div>
+                    <p><strong>Description:</strong> Retrieve featured events curated by the platform.</p>
+                    <span class="badge">No Authentication Required</span>
+                </div>
+
+                <div class="endpoint">
+                    <h3><span class="method get">GET</span> Popular Events</h3>
+                    <div class="url">http://localhost:8000/en/api/v3/event/feed/popular</div>
+                    <p><strong>Description:</strong> Retrieve events sorted by popularity.</p>
+                    <span class="badge">No Authentication Required</span>
+                </div>
+
+                <div class="endpoint">
+                    <h3><span class="method post">POST</span> Price Calculate</h3>
+                    <div class="url">http://localhost:8000/en/api/v3/event/price-calculate</div>
+                    <p><strong>Description:</strong> Calculate the total price for an event based on the number of attendees.</p>
+                    
+                    <h4>Request Body:</h4>
+                    <div class="code-block">{
+  "event_id": 1,
+  "people_count": 10
+}</div>
+
+                    <table class="param-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>event_id</td>
+                                <td>integer</td>
+                                <td>Yes</td>
+                                <td>The ID of the event</td>
+                            </tr>
+                            <tr>
+                                <td>people_count</td>
+                                <td>integer</td>
+                                <td>Yes</td>
+                                <td>Number of people attending</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Response:</h4>
+                    <p>Returns the calculated total price including any applicable discounts.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Authentication Flow</h2>
+                <p>The API uses session-based authentication with cookies:</p>
+                <ol style="margin-left: 2rem; margin-top: 1rem;">
+                    <li style="margin-bottom: 0.5rem;">Register a new account using the <code>/auth/register</code> endpoint</li>
+                    <li style="margin-bottom: 0.5rem;">Login with credentials using the <code>/auth/login</code> endpoint</li>
+                    <li style="margin-bottom: 0.5rem;">The server sets a <code>customer_session_token</code> cookie (valid for 48 hours)</li>
+                    <li style="margin-bottom: 0.5rem;">Include this cookie in subsequent requests to authenticated endpoints</li>
+                    <li style="margin-bottom: 0.5rem;">Use <code>/auth/logout</code> to end the session</li>
+                </ol>
+                
+                <div class="info-box" style="margin-top: 1rem;">
+                    <strong>Cookie Details:</strong>
+                    <ul style="margin-left: 2rem; margin-top: 0.5rem;">
+                        <li><code>customer_session_token</code>: Session authentication token</li>
+                        <li><code>csrftoken</code>: CSRF protection token for POST requests</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Error Handling</h2>
+                <p>The API uses standard HTTP status codes to indicate success or failure:</p>
+                <table class="param-table" style="margin-top: 1rem;">
+                    <thead>
+                        <tr>
+                            <th>Status Code</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>200</strong></td>
+                            <td>Success - Request completed successfully</td>
+                        </tr>
+                        <tr>
+                            <td><strong>400</strong></td>
+                            <td>Bad Request - Invalid parameters or request body</td>
+                        </tr>
+                        <tr>
+                            <td><strong>401</strong></td>
+                            <td>Unauthorized - Authentication required or invalid credentials</td>
+                        </tr>
+                        <tr>
+                            <td><strong>404</strong></td>
+                            <td>Not Found - Resource does not exist</td>
+                        </tr>
+                        <tr>
+                            <td><strong>500</strong></td>
+                            <td>Server Error - Internal server error occurred</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>Discount Customer API Documentation &copy; 2025</p>
+            <p style="margin-top: 0.5rem; opacity: 0.8;">Version 3.0</p>
+        </div>
+    </footer>
+</body>
+</html>

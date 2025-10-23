@@ -1,5 +1,5 @@
 from django.db import models
-from accounts.models import Customer
+from customer.models import Customer
 from services.models import Event
 
 class Order(models.Model):

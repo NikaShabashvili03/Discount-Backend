@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discount Admin API Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .nav {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .nav h2 {
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+
+        .nav-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            padding: 0.5rem 1rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #667eea;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .nav-link:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 4px;
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .method {
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .method.get { background: #28a745; color: white; }
+        .method.post { background: #007bff; color: white; }
+        .method.patch { background: #ffc107; color: #333; }
+        .method.delete { background: #dc3545; color: white; }
+        .method.put { background: #17a2b8; color: white; }
+
+        .endpoint-url {
+            font-family: 'Courier New', monospace;
+            color: #495057;
+            word-break: break-all;
+        }
+
+        .endpoint-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .endpoint-body {
+            margin-top: 1rem;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .label {
+            font-weight: 600;
+            color: #667eea;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .base-url {
+            background: #e7f3ff;
+            padding: 1rem;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+            margin-bottom: 2rem;
+        }
+
+        .base-url code {
+            font-family: 'Courier New', monospace;
+            color: #007bff;
+            font-weight: 600;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        .params {
+            margin-top: 1rem;
+        }
+
+        .param-item {
+            padding: 0.5rem;
+            background: white;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+        }
+
+        .param-name {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .param-type {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎫 Discount Admin API</h1>
+        <p>Complete API documentation for the Discount Admin system</p>
+    </div>
+
+    <div class="container">
+        <div class="nav">
+            <h2>Quick Navigation</h2>
+            <div class="nav-links">
+                <a href="#auth" class="nav-link">Authentication</a>
+                <a href="#category" class="nav-link">Categories</a>
+                <a href="#country" class="nav-link">Countries</a>
+                <a href="#city" class="nav-link">Cities</a>
+                <a href="#event" class="nav-link">Events</a>
+                <a href="#staff" class="nav-link">Staff</a>
+                <a href="#customers" class="nav-link">Customers</a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Base URL</h2>
+            <div class="base-url">
+                <code>http://localhost:8000/{language}/api/v1</code>
+            </div>
+            <div class="info-box">
+                <strong>Note:</strong> Replace <code>{language}</code> with language code (e.g., <code>en</code>, <code>ru</code>)
+            </div>
+        </div>
+
+        <!-- Authentication -->
+        <div class="section" id="auth">
+            <h2>Authentication</h2>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-url">/auth/login</span>
+                </div>
+                <div class="endpoint-name">Login</div>
+                <span class="label">Request Body:</span>
+                <div class="code-block">{
+  "email": "admin@gmail.com",
+  "password": "123"
+}</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/auth/profile</span>
+                </div>
+                <div class="endpoint-name">Get Profile</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-url">/auth/logout</span>
+                </div>
+                <div class="endpoint-name">Logout</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-url">/auth/create</span>
+                </div>
+                <div class="endpoint-name">Create Admin</div>
+                <span class="label">Request Body:</span>
+                <div class="code-block">{
+  "firstname": "admin2",
+  "lastname": "admin2",
+  "email": "admin2@gmail.com",
+  "mobile": "577123322",
+  "country": "Geo",
+  "password": "123"
+}</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/auth/list</span>
+                </div>
+                <div class="endpoint-name">List of Admins</div>
+            </div>
+        </div>
+
+        <!-- Category -->
+        <div class="section" id="category">
+            <h2>Category Management</h2>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/category/list</span>
+                </div>
+                <div class="endpoint-name">List Categories</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method patch">PATCH</span>
+                    <span class="endpoint-url">/category/upload</span>
+                </div>
+                <div class="endpoint-name">Create / Update Category</div>
+                <span class="label">Request Body:</span>
+                <div class="code-block">{
+  "name": "cat23",
+  "category_id": 1
+}</div>
+                <div class="info-box">
+                    Omit <code>category_id</code> to create a new category
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method delete">DELETE</span>
+                    <span class="endpoint-url">/category/delete/{id}</span>
+                </div>
+                <div class="endpoint-name">Delete Category</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/category/company/{company_id}/list</span>
+                </div>
+                <div class="endpoint-name">Categories by Company</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method delete">DELETE</span>
+                    <span class="endpoint-url">/category/company-category</span>
+                </div>
+                <div class="endpoint-name">Link / Unlink Company to Category</div>
+                <span class="label">Request Body:</span>
+                <div class="code-block">{
+  "company_id": 1,
+  "category_id": 1
+}</div>
+            </div>
+        </div>
+
+        <!-- Country -->
+        <div class="section" id="country">
+            <h2>Country Management</h2>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/country/list</span>
+                </div>
+                <div class="endpoint-name">List Countries</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method patch">PATCH</span>
+                    <span class="endpoint-url">/country/upload</span>
+                </div>
+                <div class="endpoint-name">Update / Create Country</div>
+                <span class="label">Request Body:</span>
+                <div class="code-block">{
+  "country_id": 4,
+  "name": "2333",
+  "is_active": true
+}</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method delete">DELETE</span>
+                    <span class="endpoint-url">/country/delete/{id}</span>
+                </div>
+                <div class="endpoint-name">Delete Country</div>
+            </div>
+        </div>
+
+        <!-- City -->
+        <div class="section" id="city">
+            <h2>City Management</h2>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/city/list</span>
+                </div>
+                <div class="endpoint-name">List Cities</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method patch">PATCH</span>
+                    <span class="endpoint-url">/city/upload</span>
+                </div>
+                <div class="endpoint-name">Update / Create City</div>
+                <span class="label">Request Body:</span>
+                <div class="code-block">{
+  "city_id": 1,
+  "name": "2333",
+  "is_active": true,
+  "country_id": 1
+}</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method delete">DELETE</span>
+                    <span class="endpoint-url">/city/delete/{id}</span>
+                </div>
+                <div class="endpoint-name">Delete City</div>
+            </div>
+        </div>
+
+        <!-- Event -->
+        <div class="section" id="event">
+            <h2>Event Management</h2>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/event/feed</span>
+                </div>
+                <div class="endpoint-name">Event Feed</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/event/feed/popular</span>
+                </div>
+                <div class="endpoint-name">Popular Events</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/event/feed/featured</span>
+                </div>
+                <div class="endpoint-name">Featured Events</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/event/feed/discounted</span>
+                </div>
+                <div class="endpoint-name">Discounted Events</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-url">/event/create</span>
+                </div>
+                <div class="endpoint-name">Create Event</div>
+                <span class="label">Request Body:</span>
+                <div class="code-block">{
+  "company_id": 1,
+  "name": "Premium House Cleaning Service",
+  "description": "Comprehensive house cleaning...",
+  "category": 1,
+  "city": 1,
+  "base_price": "100.00",
+  "price_per_person": "20.00",
+  "location": "123 Main Street, Batumi"
+}</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method patch">PATCH</span>
+                    <span class="endpoint-url">/event/update/{id}</span>
+                </div>
+                <div class="endpoint-name">Update Event</div>
+                <span class="label">Request Body:</span>
+                <div class="code-block">{
+  "name": "Updated Service",
+  "description": "Updated description...",
+  "category": 1,
+  "city": 3,
+  "base_price": "1020.00",
+  "price_per_person": "20.00",
+  "location": "123 Main Street, Batumi"
+}</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method delete">DELETE</span>
+                    <span class="endpoint-url">/event/delete/{id}</span>
+                </div>
+                <div class="endpoint-name">Delete Event</div>
+            </div>
+
+            <h3 style="margin-top: 2rem; color: #764ba2;">Event Images</h3>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-url">/event/{event_id}/images</span>
+                </div>
+                <div class="endpoint-name">Upload Image</div>
+                <span class="label">Form Data:</span>
+                <div class="params">
+                    <div class="param-item">
+                        <span class="param-name">image</span> <span class="param-type">(file)</span> - Image file
+                    </div>
+                    <div class="param-item">
+                        <span class="param-name">alt_text</span> <span class="param-type">(string)</span> - Alt text
+                    </div>
+                    <div class="param-item">
+                        <span class="param-name">is_primary</span> <span class="param-type">(boolean)</span> - Is primary image
+                    </div>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method put">PUT</span>
+                    <span class="endpoint-url">/event/{event_id}/images/update/{image_id}</span>
+                </div>
+                <div class="endpoint-name">Update Image</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method delete">DELETE</span>
+                    <span class="endpoint-url">/event/{event_id}/images/delete/{image_id}</span>
+                </div>
+                <div class="endpoint-name">Delete Image</div>
+            </div>
+        </div>
+
+        <!-- Staff -->
+        <div class="section" id="staff">
+            <h2>Staff Management</h2>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/staff/list</span>
+                </div>
+                <div class="endpoint-name">List Staff</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-url">/staff/create</span>
+                </div>
+                <div class="endpoint-name">Create Staff</div>
+                <span class="label">Request Body:</span>
+                <div class="code-block">{
+  "firstname": "John",
+  "lastname": "Doe",
+  "country": "ge",
+  "mobile": "555123456",
+  "email": "john@gmail.com",
+  "password": "123"
+}</div>
+            </div>
+
+            <h3 style="margin-top: 2rem; color: #764ba2;">Company Management</h3>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/staff/company/list</span>
+                </div>
+                <div class="endpoint-name">List Companies</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-url">/staff/company/create</span>
+                </div>
+                <div class="endpoint-name">Create Company</div>
+                <span class="label">Request Body:</span>
+                <div class="code-block">{
+  "company_id": 2,
+  "user_id": 2,
+  "name": "Company Name",
+  "description": "Company Description",
+  "founded_year": 2023
+}</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method patch">PATCH</span>
+                    <span class="endpoint-url">/staff/company/update/{id}</span>
+                </div>
+                <div class="endpoint-name">Update Company</div>
+                <span class="label">Request Body:</span>
+                <div class="code-block">{
+  "company_id": 2,
+  "name": "Updated Name",
+  "description": "Updated description",
+  "founded_year": 2023
+}</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-url">/staff/company/link/{company_id}</span>
+                </div>
+                <div class="endpoint-name">Link / Unlink Staff in Company</div>
+                <span class="label">Request Body:</span>
+                <div class="code-block">{
+  "staff_ids": [1, 9]
+}</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method delete">DELETE</span>
+                    <span class="endpoint-url">/staff/company/delete/{id}</span>
+                </div>
+                <div class="endpoint-name">Delete Company</div>
+            </div>
+        </div>
+
+        <!-- Customers -->
+        <div class="section" id="customers">
+            <h2>Customer Management</h2>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-url">/customer/list</span>
+                </div>
+                <div class="endpoint-name">List Customers</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Authentication Notes</h2>
+            <div class="info-box">
+                <strong>Session Cookie:</strong> The API uses cookie-based authentication. After logging in, the session token (<code>admin_session_token</code>) is stored as a cookie and automatically sent with subsequent requests.
+            </div>
+            <div class="info-box" style="margin-top: 1rem;">
+                <strong>CSRF Protection:</strong> A CSRF token (<code>csrftoken</code>) is also stored as a cookie for security purposes.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

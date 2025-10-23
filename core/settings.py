@@ -39,8 +39,11 @@ LANGUAGE_CODE = 'en'
 
 LANGUAGES = [
     ("en", _("English")),
-    ('ka', _("Georgian")),
-    ('ru', _("Russian"))
+    ("ka", _("Georgian")),
+    ("ru", _("Russian")),
+    ("tr", _("Turkish")),   
+    ("ar", _("Arabic")),    
+    ("he", _("Hebrew")),    
 ]
 
 LOGGING = {
@@ -60,7 +63,7 @@ LOGGING = {
     },
 }
 
-MODELTRANSLATION_LANGUAGES = ('en', 'ka', 'ru')
+MODELTRANSLATION_LANGUAGES = ('en', 'ka', 'ru', 'tr', 'ar', 'he')
 
 LOCALE_PATHS = [
     os.path.join(BASE_DIR, 'locale'),
@@ -80,10 +83,12 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'accounts',
     'services',
     'orders',
     'channels',
+    'panel',
+    'staff',
+    'customer',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -141,29 +146,40 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True  
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'Authorization',
-    'Content-Type',  
+    'Content-Type',
 ]
 
-CORS_ALLOW_METHODS = ['*'] 
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'http://localhost:3000',
     'https://admin.discount.com.ge',
-    'https://discount.com.ge'
+    'https://discount.com.ge',
+    'https://control.discount.com.ge'
 ]
 
 ALLOWED_HOSTS = [
     '127.0.0.1', 
     'localhost',
     'admin.discount.com.ge',
+    'control.discount.com.ge',
     'discount.com.ge'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
     'https://admin.discount.com.ge',
-    'https://discount.com.ge'
+    'https://discount.com.ge',
+    'https://control.discount.com.ge'
 ]
 
 SESSION_COOKIE_SECURE = False
@@ -212,6 +228,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 MEDIA_URL = '/uploads/' 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
+
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760
 APPEND_SLASH = False
 
@@ -226,7 +243,21 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-BOG_MERCHANT_ID = config('BOG_MERCHANT_ID', default='your_merchant_id')
-BOG_API_KEY = config('BOG_API_KEY', default='your_api_key')
-BOG_REDIRECT_URL = config('BOG_REDIRECT_URL', default='https://yourdomain.com/api/payment/callback/')
-BOG_BASE_URL = config('BOG_BASE_URL', default='https://api.bog.ge/paymentgateway/')
+BOG_BASE_URL = os.getenv("BOG_BASE_URL", "https://api.bog.ge")  
+
+
+BOG_CLIENT_INN = os.getenv("BOG_CLIENT_INN", "BOG_CLIENT_INN")
+BOG_MERCHANT_ID = os.getenv("BOG_MERCHANT_ID", "BOG_MERCHANT_ID")
+BOG_TERMINAL_ID = os.getenv("BOG_TERMINAL_ID", "BOG_TERMINAL_ID")
+
+
+BOG_PUBLIC_KEY = os.getenv("BOG_PUBLIC_KEY", "YOUR_PUBLIC_KEY_HERE")
+BOG_SECRET_KEY = os.getenv("BOG_SECRET_KEY", "YOUR_SECRET_KEY_HERE")
+
+
+BOG_SUCCESS_URL = os.getenv("BOG_SUCCESS_URL", "BOG_SUCCESS_URL")
+BOG_FAIL_URL = os.getenv("BOG_FAIL_URL", "BOG_FAIL_URL")
+
+BOG_API_TOKEN = os.getenv("BOG_API_TOKEN", "BOG_API_TOKEN")
+
+BOG_CALLBACK_URL = os.getenv("BOG_CALLBACK_URL", "https://yourdomain.com/api/orders/bog/callback/")
