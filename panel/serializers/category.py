@@ -7,13 +7,17 @@ class CategorySerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Category
-        fields = ['id', 'name', 'color', 'description', 'events_count', 'order', 'icon']
+        fields = ['id', 'name', 'activity', 'color', 'description', 'events_count', 'order', 'icon']
     
     def get_events_count(self, obj):
         return obj.events.filter(is_active=True).count()
     
 
 class CategoryCreateUpdateSerializer(serializers.Serializer):
+    ACTIVITY_CHOICE = (
+        ('water', 'Water activity'),
+        ('land', 'Land activity')
+    )
     name = serializers.CharField(max_length=255)
     description = serializers.CharField(required=False, allow_blank=True)
     order = serializers.IntegerField(required=False)
@@ -21,6 +25,7 @@ class CategoryCreateUpdateSerializer(serializers.Serializer):
     icon = serializers.CharField(required=False, allow_blank=True)
     is_active = serializers.BooleanField(default=True)
     category_id = serializers.IntegerField(required=False, write_only=True)
+    activity = serializers.ChoiceField(choices=ACTIVITY_CHOICE)
 
     def create(self, validated_data):
         validated_data.pop("category_id", None)

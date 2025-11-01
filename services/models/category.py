@@ -7,6 +7,11 @@ def upload_category_icon(instance, filename):
     return image_upload(instance, filename, 'category_icons/')
 
 class Category(models.Model):
+    ACTIVITY_CHOICE = (
+        ('water', 'Water activity'),
+        ('land', 'Land activity')
+    )
+
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     icon = models.ImageField(upload_to=upload_category_icon, null=True, blank=True)
@@ -14,6 +19,8 @@ class Category(models.Model):
     color = models.CharField(max_length=50, blank=True, null=True)
     order = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    activity = models.CharField(max_length=25, choices=ACTIVITY_CHOICE)
 
     def save(self, *args, **kwargs):
         if self.icon:
