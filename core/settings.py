@@ -162,24 +162,30 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'http://localhost:3000',
-    'https://admin.discount.com.ge',
-    'https://discount.com.ge',
-    'https://control.discount.com.ge'
+    'https://base.funfinder.ge',
+    'https://scan.funfinder.ge',
+    'https://staff.funfinder.ge',
+    'https://admin.funfinder.ge',
+    'https://funfinder.ge',
 ]
 
 ALLOWED_HOSTS = [
     '127.0.0.1', 
     'localhost',
-    'admin.discount.com.ge',
-    'control.discount.com.ge',
-    'discount.com.ge'
+    'base.funfinder.ge',
+    'scan.funfinder.ge',
+    'staff.funfinder.ge',
+    'admin.funfinder.ge',
+    'funfinder.ge',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
-    'https://admin.discount.com.ge',
-    'https://discount.com.ge',
-    'https://control.discount.com.ge'
+    'https://base.funfinder.ge',
+    'https://scan.funfinder.ge',
+    'https://staff.funfinder.ge',
+    'https://admin.funfinder.ge',
+    'https://funfinder.ge',
 ]
 
 SESSION_COOKIE_SECURE = False
