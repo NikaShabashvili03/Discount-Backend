@@ -33,6 +33,13 @@ class Company(models.Model):
 
     email = models.EmailField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
+
+
+    ceo = models.CharField(max_length=255, null=False, blank=False)
+    expires_at = models.DateField(blank=True, null=True)
+    identity_number = models.CharField(max_length=255, blank=False, null=False)
+
+
     address = models.CharField(max_length=255, blank=True, null=True)
 
     facebook = models.URLField(blank=True, null=True)

@@ -4,7 +4,7 @@ from staff.models import Staff, Company, CompanyStaff
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
-        fields = ["id", "name", "description", "is_verified", "is_active", "created_at", "updated_at"]
+        fields = ["id", "name", "description", 'ceo', 'expires_at', 'identity_number', "is_verified", "is_active", "created_at", "updated_at"]
 
 class StaffSerializer(serializers.ModelSerializer):
     companies = serializers.SerializerMethodField()
@@ -87,6 +87,10 @@ class CompanyCreateSerializer(serializers.Serializer):
     twitter = serializers.URLField(required=False, allow_blank=True)
 
     commission_rate = serializers.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+
+    ceo = serializers.CharField(max_length=50, required=True)
+    expires_at = serializers.DateField(required=False)
+    identity_number = serializers.CharField(max_length=50, required=True)
 
     def create(self, validated_data):
         company = Company.objects.create(**validated_data)

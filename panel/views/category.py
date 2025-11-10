@@ -1,4 +1,5 @@
 from rest_framework import generics, permissions, status
+from ..serializers.staff import CompanySerializer
 from ..serializers.category import CategorySerializer, CategoryCreateUpdateSerializer
 from services.models import Category, CompanyCategory
 from panel.middleware import AdminSessionMiddleware
@@ -7,6 +8,7 @@ from rest_framework.views import APIView
 from staff.models import Company
 from django.shortcuts import get_object_or_404
 from panel.permissions import IsAdminAuthenticated
+
 
 class CategoryAdminListView(generics.ListAPIView):
     queryset = Category.objects.all()
@@ -71,6 +73,24 @@ class CategoryDeleteView(APIView):
         category.delete()
         return Response({"detail": "Category deleted successfully."}, status=status.HTTP_200_OK)
 
+class AdminCompanyFeedByCategory(APIView):
+    permission_classes = [IsAdminAuthenticated]
+    authentication_classes = [AdminSessionMiddleware]
+
+    def get(self, request, category_id, *args, **kwargs):
+        if not category_id:
+            return Response(
+                {"error": "category_id is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        category = get_object_or_404(Category, id=category_id)
+
+        feeds = Company.objects.filter(categories__category=category).distinct()
+        serializer = CompanySerializer(feeds, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    
 class AdminCompanyCategoryListView(generics.ListAPIView):
     serializer_class = CategorySerializer
     permission_classes = [IsAdminAuthenticated]

@@ -32,7 +32,7 @@ class EventListSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description',
                  'base_price', 'price_per_person', 'min_people', 'max_people', 'location',
                  'is_popular', 'is_featured', 'views_count', 'bookings_count', 'category', 'city',
-                 'company', 'primary_image', 'current_discount', 'discounted_price', 'created_at']
+                 'company', 'primary_image', 'longitude', 'latitude', 'current_discount', 'discounted_price', 'created_at']
     
     def get_primary_image(self, obj):
         primary_image = obj.images.filter(is_primary=True).first()

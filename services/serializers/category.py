@@ -6,7 +6,7 @@ class CategorySerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Category
-        fields = ['id', 'name', 'color', 'description', 'events_count', 'order', 'icon']
+        fields = ['id', 'name', 'color', 'activity', 'description', 'events_count', 'order', 'icon']
     
     def get_events_count(self, obj):
         return obj.events.filter(is_active=True).count()

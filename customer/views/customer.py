@@ -9,7 +9,6 @@ from django.utils.timezone import now
 from datetime import timedelta
 from ..models import CustomerSession, BlackList
 from core.utils import get_client_ip
-from panel.permissions import IsAdminAuthenticated
 
 class RegisterView(generics.GenericAPIView):
     serializer_class = CustomerRegisterSerializer

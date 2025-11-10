@@ -7,5 +7,6 @@ urlpatterns = [
     path('city/', include('panel.urls.city')),
     path('event/', include('panel.urls.event')),
     path('staff/', include('panel.urls.staff')),
-    path('customer/', include('panel.urls.customer'))
+    path('customer/', include('panel.urls.customer')),
+    path('slider/', include('panel.urls.slider'))
 ]
