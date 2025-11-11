@@ -19,9 +19,6 @@ from ..models.payment import Payment, PAYMENT_METHODS
 # BOG Authentication
 # -------------------------------
 def get_bog_access_token(client_id, client_secret):
-    """
-    Authenticate with BOG and get access token
-    """
     url = "https://oauth2.bog.ge/auth/realms/bog/protocol/openid-connect/token"
     auth_str = f"{client_id}:{client_secret}"
     base64_auth = base64.b64encode(auth_str.encode()).decode()
@@ -49,7 +46,7 @@ class BOGInitiatePaymentView(APIView):
 
     def post(self, request):
         order_number = request.data.get("order_number")
-        method = request.data.get("method")  # <-- new field
+        method = request.data.get("method")  # Chosen payment method
         allowed_methods = [m[0] for m in PAYMENT_METHODS]
 
         if not order_number:
@@ -68,7 +65,7 @@ class BOGInitiatePaymentView(APIView):
 
         # Get access token
         try:
-            token = get_bog_access_token(settings.BOG_PUBLIC_KEY, settings.BOG_SECRET_KEY)
+            token = get_bog_access_token(settings.BOG_CLIENT_INN, settings.BOG_SECRET_KEY)
         except Exception as e:
             return Response({"error": "Failed to authenticate with BOG", "details": str(e)}, status=500)
 
@@ -95,7 +92,7 @@ class BOGInitiatePaymentView(APIView):
                 "success": settings.BOG_SUCCESS_URL,
                 "fail": settings.BOG_FAIL_URL,
             },
-            "payment_method": [method],  # <-- use the chosen method
+            "payment_method": [method],  # Use chosen method
             "config": {
                 "theme": "light",
                 "capture": "automatic"
@@ -132,7 +129,7 @@ class BOGInitiatePaymentView(APIView):
         Payment.objects.update_or_create(
             order=order,
             defaults={
-                "payment_method": method,  # <-- save chosen method
+                "payment_method": method,  # Save chosen method
                 "amount": order.total_price,
                 "requested_amount": order.total_price,
                 "currency": getattr(order, "currency", "GEL"),
@@ -143,6 +140,7 @@ class BOGInitiatePaymentView(APIView):
         )
 
         return Response(response_data, status=200)
+
 
 # -------------------------------
 # Callback with Signature Verification
@@ -155,7 +153,7 @@ class BOGPaymentCallbackView(APIView):
         """
         Verify BOG callback signature using SHA256withRSA
         """
-        public_key_pem = settings.BOG_PUBLIC_KEY_PEM
+        public_key_pem = settings.BOG_PUBLIC_KEY  # Use existing public key
         signature = base64.b64decode(signature_base64)
 
         public_key = serialization.load_pem_public_key(public_key_pem.encode())
@@ -178,7 +176,6 @@ class BOGPaymentCallbackView(APIView):
             if not self.verify_signature(raw_body, callback_signature):
                 return Response({"error": "Invalid signature"}, status=400)
 
-        # Parse JSON only after verifying signature
         data = json.loads(raw_body)
         body = data.get("body", {})
 
@@ -195,7 +192,6 @@ class BOGPaymentCallbackView(APIView):
         except Order.DoesNotExist:
             return Response({"error": "Order not found"}, status=404)
 
-        # Map BOG status to order/payment status
         bog_status = body.get("order_status", {}).get("key", "pending")
         status_map = {
             "completed": ("completed", "paid"),
@@ -209,8 +205,9 @@ class BOGPaymentCallbackView(APIView):
         Payment.objects.update_or_create(
             order=order,
             defaults={
-                "payment_method": "bog",
+                "payment_method": order.payment.payment_method if hasattr(order, 'payment') else "bog",
                 "amount": amount,
+                "requested_amount": amount,
                 "currency": getattr(order, "currency", "GEL"),
                 "transaction_id": transaction_id or "",
                 "payment_gateway_response": data,
@@ -229,7 +226,7 @@ class BOGPaymentStatusView(APIView):
 
     def get(self, request, transaction_id):
         try:
-            token = get_bog_access_token(settings.BOG_PUBLIC_KEY, settings.BOG_SECRET_KEY)
+            token = get_bog_access_token(settings.BOG_CLIENT_INN, settings.BOG_SECRET_KEY)
         except Exception as e:
             return Response({"error": "Failed to authenticate with BOG", "details": str(e)}, status=500)
 
