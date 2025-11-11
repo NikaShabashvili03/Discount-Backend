@@ -4,8 +4,6 @@ import uuid
 from decimal import Decimal
 
 import requests
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import padding
 from django.conf import settings
 from rest_framework import permissions
 from rest_framework.response import Response
@@ -13,7 +11,6 @@ from rest_framework.views import APIView
 
 from orders.models import Order
 from ..models.payment import Payment, PAYMENT_METHODS
-
 
 # -------------------------------
 # BOG Authentication
@@ -36,7 +33,6 @@ def get_bog_access_token(client_id, client_secret):
     else:
         raise Exception(f"Failed to get BOG token: {response.text}")
 
-
 # -------------------------------
 # Initiate Payment
 # -------------------------------
@@ -46,7 +42,7 @@ class BOGInitiatePaymentView(APIView):
 
     def post(self, request):
         order_number = request.data.get("order_number")
-        method = request.data.get("method")  # Chosen payment method
+        method = request.data.get("method")
         allowed_methods = [m[0] for m in PAYMENT_METHODS]
 
         if not order_number:
@@ -63,7 +59,7 @@ class BOGInitiatePaymentView(APIView):
         if order.payment_status == "paid":
             return Response({"error": "Order already paid."}, status=400)
 
-        # Get access token
+        # Get access token using BOG_CLIENT_INN and BOG_SECRET_KEY
         try:
             token = get_bog_access_token(settings.BOG_CLIENT_INN, settings.BOG_SECRET_KEY)
         except Exception as e:
@@ -92,7 +88,7 @@ class BOGInitiatePaymentView(APIView):
                 "success": settings.BOG_SUCCESS_URL,
                 "fail": settings.BOG_FAIL_URL,
             },
-            "payment_method": [method],  # Use chosen method
+            "payment_method": [method],
             "config": {
                 "theme": "light",
                 "capture": "automatic"
@@ -129,7 +125,7 @@ class BOGInitiatePaymentView(APIView):
         Payment.objects.update_or_create(
             order=order,
             defaults={
-                "payment_method": method,  # Save chosen method
+                "payment_method": method,
                 "amount": order.total_price,
                 "requested_amount": order.total_price,
                 "currency": getattr(order, "currency", "GEL"),
@@ -141,42 +137,15 @@ class BOGInitiatePaymentView(APIView):
 
         return Response(response_data, status=200)
 
-
 # -------------------------------
-# Callback with Signature Verification
+# Callback
 # -------------------------------
 class BOGPaymentCallbackView(APIView):
     authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
-    def verify_signature(self, raw_body, signature_base64):
-        """
-        Verify BOG callback signature using SHA256withRSA
-        """
-        public_key_pem = settings.BOG_PUBLIC_KEY  # Use existing public key
-        signature = base64.b64decode(signature_base64)
-
-        public_key = serialization.load_pem_public_key(public_key_pem.encode())
-        try:
-            public_key.verify(
-                signature,
-                raw_body,
-                padding.PKCS1v15(),
-                hashes.SHA256()
-            )
-            return True
-        except Exception:
-            return False
-
     def post(self, request, *args, **kwargs):
-        raw_body = request.body
-        callback_signature = request.headers.get("Callback-Signature")
-
-        if callback_signature:
-            if not self.verify_signature(raw_body, callback_signature):
-                return Response({"error": "Invalid signature"}, status=400)
-
-        data = json.loads(raw_body)
+        data = request.data
         body = data.get("body", {})
 
         external_order_id = body.get("order_id") or body.get("external_order_id")
@@ -205,9 +174,8 @@ class BOGPaymentCallbackView(APIView):
         Payment.objects.update_or_create(
             order=order,
             defaults={
-                "payment_method": order.payment.payment_method if hasattr(order, 'payment') else "bog",
+                "payment_method": "bog",
                 "amount": amount,
-                "requested_amount": amount,
                 "currency": getattr(order, "currency", "GEL"),
                 "transaction_id": transaction_id or "",
                 "payment_gateway_response": data,
@@ -215,7 +183,6 @@ class BOGPaymentCallbackView(APIView):
         )
 
         return Response({"message": "Payment callback processed successfully"}, status=200)
-
 
 # -------------------------------
 # Payment Status
