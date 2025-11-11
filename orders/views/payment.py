@@ -4,6 +4,8 @@ import uuid
 from decimal import Decimal
 
 import requests
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding
 from django.conf import settings
 from rest_framework import permissions
 from rest_framework.response import Response
@@ -11,6 +13,7 @@ from rest_framework.views import APIView
 
 from orders.models import Order
 from ..models.payment import Payment, PAYMENT_METHODS
+
 
 # -------------------------------
 # BOG Authentication
@@ -33,9 +36,19 @@ def get_bog_access_token(client_id, client_secret):
     else:
         raise Exception(f"Failed to get BOG token: {response.text}")
 
-# -------------------------------
-# Initiate Payment
-# -------------------------------
+BOG_PUBLIC_KEY_PEM = """
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu4RUyAw3+CdkS3ZNILQh
+zHI9Hemo+vKB9U2BSabppkKjzjjkf+0Sm76hSMiu/HFtYhqWOESryoCDJoqffY0Q
+1VNt25aTxbj068QNUtnxQ7KQVLA+pG0smf+EBWlS1vBEAFbIas9d8c9b9sSEkTrr
+TYQ90WIM8bGB6S/KLVoT1a7SnzabjoLc5Qf/SLDG5fu8dH8zckyeYKdRKSBJKvhx
+tcBuHV4f7qsynQT+f2UYbESX/TLHwT5qFWZDHZ0YUOUIvb8n7JujVSGZO9/+ll/g
+4ZIWhC1MlJgPObDwRkRd8NFOopgxMcMsDIZIoLbWKhHVq67hdbwpAq9K9WMmEhPn
+PwIDAQAB
+-----END PUBLIC KEY-----
+"""
+
+
 class BOGInitiatePaymentView(APIView):
     authentication_classes = []
     permission_classes = [permissions.AllowAny]
@@ -59,9 +72,9 @@ class BOGInitiatePaymentView(APIView):
         if order.payment_status == "paid":
             return Response({"error": "Order already paid."}, status=400)
 
-        # Get access token using BOG_CLIENT_INN and BOG_SECRET_KEY
+        # Get access token
         try:
-            token = get_bog_access_token(settings.BOG_CLIENT_INN, settings.BOG_SECRET_KEY)
+            token = get_bog_access_token(settings.BOG_PUBLIC_KEY, settings.BOG_SECRET_KEY)
         except Exception as e:
             return Response({"error": "Failed to authenticate with BOG", "details": str(e)}, status=500)
 
@@ -88,7 +101,7 @@ class BOGInitiatePaymentView(APIView):
                 "success": settings.BOG_SUCCESS_URL,
                 "fail": settings.BOG_FAIL_URL,
             },
-            "payment_method": [method],
+            "payment_method": [method],  # <-- use the chosen method
             "config": {
                 "theme": "light",
                 "capture": "automatic"
@@ -125,7 +138,7 @@ class BOGInitiatePaymentView(APIView):
         Payment.objects.update_or_create(
             order=order,
             defaults={
-                "payment_method": method,
+                "payment_method": method,  # <-- save chosen method
                 "amount": order.total_price,
                 "requested_amount": order.total_price,
                 "currency": getattr(order, "currency", "GEL"),
@@ -138,14 +151,38 @@ class BOGInitiatePaymentView(APIView):
         return Response(response_data, status=200)
 
 # -------------------------------
-# Callback
+# Callback with Signature Verification
 # -------------------------------
 class BOGPaymentCallbackView(APIView):
     authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
+    def verify_signature(self, raw_body, signature_base64):
+        public_key_pem = settings.BOG_PUBLIC_KEY_PEM
+        signature = base64.b64decode(signature_base64)
+
+        public_key = serialization.load_pem_public_key(public_key_pem.encode())
+        try:
+            public_key.verify(
+                signature,
+                raw_body,
+                padding.PKCS1v15(),
+                hashes.SHA256()
+            )
+            return True
+        except Exception:
+            return False
+
     def post(self, request, *args, **kwargs):
-        data = request.data
+        raw_body = request.body
+        callback_signature = request.headers.get("Callback-Signature")
+
+        if callback_signature:
+            if not self.verify_signature(raw_body, callback_signature):
+                return Response({"error": "Invalid signature"}, status=400)
+
+        # Parse JSON only after verifying signature
+        data = json.loads(raw_body)
         body = data.get("body", {})
 
         external_order_id = body.get("order_id") or body.get("external_order_id")
@@ -161,6 +198,7 @@ class BOGPaymentCallbackView(APIView):
         except Order.DoesNotExist:
             return Response({"error": "Order not found"}, status=404)
 
+        # Map BOG status to order/payment status
         bog_status = body.get("order_status", {}).get("key", "pending")
         status_map = {
             "completed": ("completed", "paid"),
@@ -184,6 +222,7 @@ class BOGPaymentCallbackView(APIView):
 
         return Response({"message": "Payment callback processed successfully"}, status=200)
 
+
 # -------------------------------
 # Payment Status
 # -------------------------------
@@ -193,7 +232,7 @@ class BOGPaymentStatusView(APIView):
 
     def get(self, request, transaction_id):
         try:
-            token = get_bog_access_token(settings.BOG_CLIENT_INN, settings.BOG_SECRET_KEY)
+            token = get_bog_access_token(settings.BOG_PUBLIC_KEY, settings.BOG_SECRET_KEY)
         except Exception as e:
             return Response({"error": "Failed to authenticate with BOG", "details": str(e)}, status=500)
 
