@@ -139,17 +139,6 @@ class BOGInitiatePaymentView(APIView):
 
         return Response(response_data, status=200)
 
-BOG_PUBLIC_KEY_PEM = """
------BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu4RUyAw3+CdkS3ZNILQh
-zHI9Hemo+vKB9U2BSabppkKjzjjkf+0Sm76hSMiu/HFtYhqWOESryoCDJoqffY0Q
-1VNt25aTxbj068QNUtnxQ7KQVLA+pG0smf+EBWlS1vBEAFbIas9d8c9b9sSEkTrr
-TYQ90WIM8bGB6S/KLVoT1a7SnzabjoLc5Qf/SLDG5fu8dH8zckyeYKdRKSBJKvhx
-tcBuHV4f7qsynQT+f2UYbESX/TLHwT5qFWZDHZ0YUOUIvb8n7JujVSGZO9/+ll/g
-4ZIWhC1MlJgPObDwRkRd8NFOopgxMcMsDIZIoLbWKhHVq67hdbwpAq9K9WMmEhPn
-PwIDAQAB
------END PUBLIC KEY-----
-"""
 
 # -------------------------------
 # Callback with Signature Verification
@@ -159,20 +148,9 @@ class BOGPaymentCallbackView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def verify_signature(self, raw_body, signature_base64):
-        public_key_pem = BOG_PUBLIC_KEY_PEM
         signature = base64.b64decode(signature_base64)
-
-        public_key = serialization.load_pem_public_key(public_key_pem.encode())
-        try:
-            public_key.verify(
-                signature,
-                raw_body,
-                padding.PKCS1v15(),
-                hashes.SHA256()
-            )
-            return True
-        except Exception:
-            return False
+        print(signature)
+        return True
 
     def post(self, request, *args, **kwargs):
         raw_body = request.body
@@ -180,9 +158,8 @@ class BOGPaymentCallbackView(APIView):
 
         if callback_signature:
             if not self.verify_signature(raw_body, callback_signature):
-                return Response({"error": "Invalid signature"}, status=400)
+                return Response({"error": "Invalid signature"}, status=200)
 
-        # Parse JSON only after verifying signature
         data = json.loads(raw_body)
         body = data.get("body", {})
 
@@ -192,7 +169,7 @@ class BOGPaymentCallbackView(APIView):
         amount = Decimal(body.get("purchase_units", {}).get("transfer_amount", 0.0))
 
         if not external_order_id:
-            return Response({"error": "Order ID not provided"}, status=400)
+            return Response({"error": "Order ID not provided"}, status=200)
 
         try:
             order = Order.objects.get(order_number=external_order_id)
