@@ -158,7 +158,7 @@ class BOGPaymentCallbackView(APIView):
 
         if callback_signature:
             if not self.verify_signature(raw_body, callback_signature):
-                return Response({"error": "Invalid signature"}, status=200)
+                return Response({"error": "Invalid signature"}, status=400)
 
         data = json.loads(raw_body)
         body = data.get("body", {})
@@ -169,14 +169,13 @@ class BOGPaymentCallbackView(APIView):
         amount = Decimal(body.get("purchase_units", {}).get("transfer_amount", 0.0))
 
         if not external_order_id:
-            return Response({"error": "Order ID not provided"}, status=200)
+            return Response({"error": "Order ID not provided"}, status=400)
 
         try:
             order = Order.objects.get(order_number=external_order_id)
         except Order.DoesNotExist:
-            return Response({"error": "Order not found"}, status=404)
+            return Response({"error": "Order not found"}, status=202)
 
-        # Map BOG status to order/payment status
         bog_status = body.get("order_status", {}).get("key", "pending")
         status_map = {
             "completed": ("completed", "paid"),
