@@ -139,6 +139,17 @@ class BOGInitiatePaymentView(APIView):
 
         return Response(response_data, status=200)
 
+BOG_PUBLIC_KEY_PEM = """
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu4RUyAw3+CdkS3ZNILQh
+zHI9Hemo+vKB9U2BSabppkKjzjjkf+0Sm76hSMiu/HFtYhqWOESryoCDJoqffY0Q
+1VNt25aTxbj068QNUtnxQ7KQVLA+pG0smf+EBWlS1vBEAFbIas9d8c9b9sSEkTrr
+TYQ90WIM8bGB6S/KLVoT1a7SnzabjoLc5Qf/SLDG5fu8dH8zckyeYKdRKSBJKvhx
+tcBuHV4f7qsynQT+f2UYbESX/TLHwT5qFWZDHZ0YUOUIvb8n7JujVSGZO9/+ll/g
+4ZIWhC1MlJgPObDwRkRd8NFOopgxMcMsDIZIoLbWKhHVq67hdbwpAq9K9WMmEhPn
+PwIDAQAB
+-----END PUBLIC KEY-----
+"""
 
 # -------------------------------
 # Callback with Signature Verification
@@ -148,9 +159,20 @@ class BOGPaymentCallbackView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def verify_signature(self, raw_body, signature_base64):
+        public_key_pem = BOG_PUBLIC_KEY_PEM 
         signature = base64.b64decode(signature_base64)
-        print(signature)
-        return True
+
+        public_key = serialization.load_pem_public_key(public_key_pem.encode())
+        try:
+            public_key.verify(
+                signature,
+                raw_body,
+                padding.PKCS1v15(),
+                hashes.SHA256()
+            )
+            return True
+        except Exception:
+            return False
 
     def post(self, request, *args, **kwargs):
         raw_body = request.body
@@ -163,6 +185,8 @@ class BOGPaymentCallbackView(APIView):
         data = json.loads(raw_body)
         body = data.get("body", {})
 
+        print(body)
+
         external_order_id = body.get("order_id") or body.get("external_order_id")
         payment_detail = body.get("payment_detail", {})
         transaction_id = payment_detail.get("transaction_id")
@@ -171,31 +195,31 @@ class BOGPaymentCallbackView(APIView):
         if not external_order_id:
             return Response({"error": "Order ID not provided"}, status=400)
 
-        try:
-            order = Order.objects.get(order_number=external_order_id)
-        except Order.DoesNotExist:
-            return Response({"error": "Order not found"}, status=202)
+        # try:
+        #     order = Order.objects.get(order_number=external_order_id)
+        # except Order.DoesNotExist:
+        #     return Response({"error": "Order not found"}, status=404)
 
-        bog_status = body.get("order_status", {}).get("key", "pending")
-        status_map = {
-            "completed": ("completed", "paid"),
-            "failed": ("cancelled", "failed"),
-            "refunded": ("completed", "refunded"),
-            "pending": ("pending", "pending"),
-        }
-        order.status, order.payment_status = status_map.get(bog_status, ("pending", "pending"))
-        order.save()
+        # bog_status = body.get("order_status", {}).get("key", "pending")
+        # status_map = {
+        #     "completed": ("completed", "paid"),
+        #     "failed": ("cancelled", "failed"),
+        #     "refunded": ("completed", "refunded"),
+        #     "pending": ("pending", "pending"),
+        # }
+        # order.status, order.payment_status = status_map.get(bog_status, ("pending", "pending"))
+        # order.save()
 
-        Payment.objects.update_or_create(
-            order=order,
-            defaults={
-                "payment_method": "bog",
-                "amount": amount,
-                "currency": getattr(order, "currency", "GEL"),
-                "transaction_id": transaction_id or "",
-                "payment_gateway_response": data,
-            },
-        )
+        # Payment.objects.update_or_create(
+        #     order=order,
+        #     defaults={
+        #         "payment_method": "bog",
+        #         "amount": amount,
+        #         "currency": getattr(order, "currency", "GEL"),
+        #         "transaction_id": transaction_id or "",
+        #         "payment_gateway_response": data,
+        #     },
+        # )
 
         return Response({"message": "Payment callback processed successfully"}, status=200)
 
