@@ -36,17 +36,6 @@ def get_bog_access_token(client_id, client_secret):
     else:
         raise Exception(f"Failed to get BOG token: {response.text}")
 
-BOG_PUBLIC_KEY_PEM = """
------BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu4RUyAw3+CdkS3ZNILQh
-zHI9Hemo+vKB9U2BSabppkKjzjjkf+0Sm76hSMiu/HFtYhqWOESryoCDJoqffY0Q
-1VNt25aTxbj068QNUtnxQ7KQVLA+pG0smf+EBWlS1vBEAFbIas9d8c9b9sSEkTrr
-TYQ90WIM8bGB6S/KLVoT1a7SnzabjoLc5Qf/SLDG5fu8dH8zckyeYKdRKSBJKvhx
-tcBuHV4f7qsynQT+f2UYbESX/TLHwT5qFWZDHZ0YUOUIvb8n7JujVSGZO9/+ll/g
-4ZIWhC1MlJgPObDwRkRd8NFOopgxMcMsDIZIoLbWKhHVq67hdbwpAq9K9WMmEhPn
-PwIDAQAB
------END PUBLIC KEY-----
-"""
 
 
 class BOGInitiatePaymentView(APIView):
@@ -150,6 +139,18 @@ class BOGInitiatePaymentView(APIView):
 
         return Response(response_data, status=200)
 
+BOG_PUBLIC_KEY_PEM = """
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu4RUyAw3+CdkS3ZNILQh
+zHI9Hemo+vKB9U2BSabppkKjzjjkf+0Sm76hSMiu/HFtYhqWOESryoCDJoqffY0Q
+1VNt25aTxbj068QNUtnxQ7KQVLA+pG0smf+EBWlS1vBEAFbIas9d8c9b9sSEkTrr
+TYQ90WIM8bGB6S/KLVoT1a7SnzabjoLc5Qf/SLDG5fu8dH8zckyeYKdRKSBJKvhx
+tcBuHV4f7qsynQT+f2UYbESX/TLHwT5qFWZDHZ0YUOUIvb8n7JujVSGZO9/+ll/g
+4ZIWhC1MlJgPObDwRkRd8NFOopgxMcMsDIZIoLbWKhHVq67hdbwpAq9K9WMmEhPn
+PwIDAQAB
+-----END PUBLIC KEY-----
+"""
+
 # -------------------------------
 # Callback with Signature Verification
 # -------------------------------
@@ -158,7 +159,7 @@ class BOGPaymentCallbackView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def verify_signature(self, raw_body, signature_base64):
-        public_key_pem = settings.BOG_PUBLIC_KEY_PEM
+        public_key_pem = BOG_PUBLIC_KEY_PEM
         signature = base64.b64decode(signature_base64)
 
         public_key = serialization.load_pem_public_key(public_key_pem.encode())
