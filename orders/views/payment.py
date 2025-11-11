@@ -109,6 +109,7 @@ class BOGPaymentCallbackView(APIView):
     authentication_classes = []
 
     def post(self, request, *args, **kwargs):
+        print(request.data)
         orders = Order.objects.all()
         for order in orders:
             order.status = "completed"
