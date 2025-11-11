@@ -1,14 +1,27 @@
+import base64
+import json
+import uuid
+from decimal import Decimal
+
 import requests
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding
 from django.conf import settings
-from rest_framework.views import APIView
+from rest_framework import permissions
 from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from orders.models import Order
 from ..models import Payment
-import base64
-import uuid
-from rest_framework import permissions
 
+
+# -------------------------------
+# BOG Authentication
+# -------------------------------
 def get_bog_access_token(client_id, client_secret):
+    """
+    Authenticate with BOG and get access token
+    """
     url = "https://oauth2.bog.ge/auth/realms/bog/protocol/openid-connect/token"
     auth_str = f"{client_id}:{client_secret}"
     base64_auth = base64.b64encode(auth_str.encode()).decode()
@@ -26,6 +39,10 @@ def get_bog_access_token(client_id, client_secret):
     else:
         raise Exception(f"Failed to get BOG token: {response.text}")
 
+
+# -------------------------------
+# Initiate Payment
+# -------------------------------
 class BOGInitiatePaymentView(APIView):
     authentication_classes = []
     permission_classes = [permissions.AllowAny]
@@ -43,14 +60,17 @@ class BOGInitiatePaymentView(APIView):
         if order.payment_status == "paid":
             return Response({"error": "Order already paid."}, status=400)
 
+        # Get access token
         try:
             token = get_bog_access_token(settings.BOG_PUBLIC_KEY, settings.BOG_SECRET_KEY)
         except Exception as e:
             return Response({"error": "Failed to authenticate with BOG", "details": str(e)}, status=500)
 
+        # Basket
         basket = [
             {
                 "product_id": str(order.id),
+                "description": order.event.name,
                 "quantity": 1,
                 "unit_price": float(order.total_price),
             }
@@ -59,15 +79,26 @@ class BOGInitiatePaymentView(APIView):
         payload = {
             "callback_url": settings.BOG_CALLBACK_URL,
             "external_order_id": order.order_number,
+            "application_type": "web",
             "purchase_units": {
-                "currency": "GEL",
+                "currency": getattr(order, "currency", "GEL"),
                 "total_amount": float(order.total_price),
                 "basket": basket,
             },
             "redirect_urls": {
                 "success": settings.BOG_SUCCESS_URL,
                 "fail": settings.BOG_FAIL_URL,
-            }
+            },
+            "payment_method": ["bog", "card"],  # Optional: allowed payment methods
+            "config": {
+                "theme": "light",
+                "capture": "automatic"
+            },
+            "buyer": {
+                "full_name": order.customer_name,
+                "masked_email": order.customer_email,
+                "masked_phone": order.customer_phone,
+            },
         }
 
         headers = {
@@ -104,20 +135,86 @@ class BOGInitiatePaymentView(APIView):
 
         return Response(response_data, status=200)
 
+
+# -------------------------------
+# Callback with Signature Verification
+# -------------------------------
 class BOGPaymentCallbackView(APIView):
-    permission_classes = [permissions.AllowAny]
     authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+
+    def verify_signature(self, raw_body, signature_base64):
+        """
+        Verify BOG callback signature using SHA256withRSA
+        """
+        public_key_pem = settings.BOG_PUBLIC_KEY_PEM
+        signature = base64.b64decode(signature_base64)
+
+        public_key = serialization.load_pem_public_key(public_key_pem.encode())
+        try:
+            public_key.verify(
+                signature,
+                raw_body,
+                padding.PKCS1v15(),
+                hashes.SHA256()
+            )
+            return True
+        except Exception:
+            return False
 
     def post(self, request, *args, **kwargs):
-        print(request.data)
-        orders = Order.objects.all()
-        for order in orders:
-            order.status = "completed"
-            order.payment_status = "paid"
-            order.save()
-        
-        return Response({"message": "Callback verified and processed"})
+        raw_body = request.body
+        callback_signature = request.headers.get("Callback-Signature")
 
+        if callback_signature:
+            if not self.verify_signature(raw_body, callback_signature):
+                return Response({"error": "Invalid signature"}, status=400)
+
+        # Parse JSON only after verifying signature
+        data = json.loads(raw_body)
+        body = data.get("body", {})
+
+        external_order_id = body.get("order_id") or body.get("external_order_id")
+        payment_detail = body.get("payment_detail", {})
+        transaction_id = payment_detail.get("transaction_id")
+        amount = Decimal(body.get("purchase_units", {}).get("transfer_amount", 0.0))
+
+        if not external_order_id:
+            return Response({"error": "Order ID not provided"}, status=400)
+
+        try:
+            order = Order.objects.get(order_number=external_order_id)
+        except Order.DoesNotExist:
+            return Response({"error": "Order not found"}, status=404)
+
+        # Map BOG status to order/payment status
+        bog_status = body.get("order_status", {}).get("key", "pending")
+        status_map = {
+            "completed": ("completed", "paid"),
+            "failed": ("cancelled", "failed"),
+            "refunded": ("completed", "refunded"),
+            "pending": ("pending", "pending"),
+        }
+        order.status, order.payment_status = status_map.get(bog_status, ("pending", "pending"))
+        order.save()
+
+        Payment.objects.update_or_create(
+            order=order,
+            defaults={
+                "payment_method": "bog",
+                "amount": amount,
+                "currency": getattr(order, "currency", "GEL"),
+                "transaction_id": transaction_id or "",
+                "payment_gateway_response": data,
+            },
+        )
+
+        return Response({"message": "Payment callback processed successfully"}, status=200)
+
+
+# -------------------------------
+# Payment Status
+# -------------------------------
 class BOGPaymentStatusView(APIView):
     authentication_classes = []
     permission_classes = [permissions.AllowAny]
