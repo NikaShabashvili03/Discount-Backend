@@ -144,7 +144,6 @@ class BOGInitiatePaymentView(APIView):
 
         return Response(response_data, status=200)
 
-
 # -------------------------------
 # Callback with Signature Verification
 # -------------------------------
