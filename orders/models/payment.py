@@ -1,19 +1,24 @@
 from django.db import models
 from orders.models import Order
 
+
+PAYMENT_METHODS = [
+    ('card', 'Credit/Debit Card'),
+    ('bog_p2p', 'BoG P2P Transfer'),
+    ('bog_loyalty', 'BoG Loyalty Points'),
+    ('bog_loan', 'BoG Installments'),
+    ('bnpl', 'Buy Now Pay Later'),
+    ('google_pay', 'Google Pay'),
+    ('apple_pay', 'Apple Pay'),
+    ('gift_card', 'Gift Card'),
+]
+
 class Payment(models.Model):
-    PAYMENT_METHODS = [
-        ('card', 'Credit/Debit Card'),
-        ('paypal', 'PayPal'),
-        ('bank_transfer', 'Bank Transfer'),
-        ('bog', 'Bank of Georgia'),
-        ('bog_p2p', 'BOG P2P'),
-        ('bog_loan', 'BOG Loan'),
-        ('apple_pay', 'Apple Pay'),
-        ('google_pay', 'Google Pay'),
-        ('bnpl', 'Buy Now Pay Later'),
+    CAPTURE_TYPES = [
+        ('automatic', 'Automatic'),
+        ('manual', 'Manual'),
     ]
-    
+
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='payment')
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -22,7 +27,7 @@ class Payment(models.Model):
     currency = models.CharField(max_length=3, default='GEL')
     
     transaction_id = models.CharField(max_length=100, blank=True)
-    capture_type = models.CharField(max_length=20, default='manual')
+    capture_type = models.CharField(max_length=20, choices=CAPTURE_TYPES, default='manual')
     payment_gateway_response = models.JSONField(null=True, blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)

@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from orders.models import Order
-from ..models import Payment
+from ..models.payment import Payment, PAYMENT_METHODS
 
 
 # -------------------------------
@@ -49,8 +49,14 @@ class BOGInitiatePaymentView(APIView):
 
     def post(self, request):
         order_number = request.data.get("order_number")
+        method = request.data.get("method")  # <-- new field
+        allowed_methods = [m[0] for m in PAYMENT_METHODS]
+
         if not order_number:
             return Response({"error": "order_number is required"}, status=400)
+
+        if not method or method not in allowed_methods:
+            return Response({"error": f"Invalid payment method. Allowed: {allowed_methods}"}, status=400)
 
         try:
             order = Order.objects.get(order_number=order_number)
@@ -89,7 +95,7 @@ class BOGInitiatePaymentView(APIView):
                 "success": settings.BOG_SUCCESS_URL,
                 "fail": settings.BOG_FAIL_URL,
             },
-            "payment_method": ["bog", "card"],  # Optional: allowed payment methods
+            "payment_method": [method],  # <-- use the chosen method
             "config": {
                 "theme": "light",
                 "capture": "automatic"
@@ -122,14 +128,17 @@ class BOGInitiatePaymentView(APIView):
         if not (200 <= response.status_code < 300):
             return Response({"error": "Payment initiation failed", "details": response_data}, status=response.status_code)
 
+        # Save Payment
         Payment.objects.update_or_create(
             order=order,
             defaults={
-                "payment_method": "bog",
+                "payment_method": method,  # <-- save chosen method
                 "amount": order.total_price,
+                "requested_amount": order.total_price,
                 "currency": getattr(order, "currency", "GEL"),
                 "transaction_id": response_data.get("id", ""),
                 "payment_gateway_response": response_data,
+                "capture_type": payload.get("config", {}).get("capture", "manual"),
             },
         )
 
