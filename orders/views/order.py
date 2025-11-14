@@ -7,18 +7,16 @@ from rest_framework.response import Response
 
 class OrderCreateView(generics.CreateAPIView):
     serializer_class = OrderCreateSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsCustomerAuthenticated]
     authentication_classes = [CustomerSessionMiddleware]
-
-    def perform_create(self, serializer):
-        self.order = serializer.save() 
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
         
-        detailed_data = OrderSerializer(self.order, context={'request': request}).data
+        order = serializer.save()
+        
+        detailed_data = OrderSerializer(order, context={'request': request}).data
         return Response(detailed_data, status=201)
 
 class OrderListView(generics.ListAPIView):

@@ -2,15 +2,8 @@ from django.db import models
 from customer.models import Customer
 from services.models import Event
 
-class Order(models.Model):
+class Order(models.Model):    
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('confirmed', 'Confirmed'),
-        ('completed', 'Completed'),
-        ('cancelled', 'Cancelled'),
-    ]
-    
-    PAYMENT_STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('paid', 'Paid'),
         ('failed', 'Failed'),
@@ -42,7 +35,6 @@ class Order(models.Model):
     commission_amount = models.DecimalField(max_digits=10, decimal_places=2)
     
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

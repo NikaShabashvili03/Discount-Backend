@@ -37,7 +37,9 @@ def get_bog_access_token(client_id, client_secret):
         raise Exception(f"Failed to get BOG token: {response.text}")
 
 
-
+# -------------------------------
+# Initiate Payment
+# -------------------------------
 class BOGInitiatePaymentView(APIView):
     authentication_classes = []
     permission_classes = [permissions.AllowAny]
@@ -58,7 +60,7 @@ class BOGInitiatePaymentView(APIView):
         except Order.DoesNotExist:
             return Response({"error": "Order not found."}, status=404)
 
-        if order.payment_status == "paid":
+        if order.status == "paid":
             return Response({"error": "Order already paid."}, status=400)
 
         # Get access token
@@ -71,7 +73,7 @@ class BOGInitiatePaymentView(APIView):
         basket = [
             {
                 "product_id": str(order.id),
-                "description": order.event.name,
+                "description": order.event.description,
                 "quantity": 1,
                 "unit_price": float(order.total_price),
             }
@@ -90,7 +92,7 @@ class BOGInitiatePaymentView(APIView):
                 "success": settings.BOG_SUCCESS_URL,
                 "fail": settings.BOG_FAIL_URL,
             },
-            "payment_method": [method],  # <-- use the chosen method
+            "payment_method": [method],
             "config": {
                 "theme": "light",
                 "capture": "automatic"
@@ -121,13 +123,14 @@ class BOGInitiatePaymentView(APIView):
             return Response({"error": "Failed to connect to BOG"}, status=500)
 
         if not (200 <= response.status_code < 300):
-            return Response({"error": "Payment initiation failed", "details": response_data}, status=response.status_code)
+            return Response({"error": "Payment initiation failed", "details": response_data},
+                            status=response.status_code)
 
-        # Save Payment
+        # Save payment record
         Payment.objects.update_or_create(
             order=order,
             defaults={
-                "payment_method": method,  # <-- save chosen method
+                "payment_method": method,
                 "amount": order.total_price,
                 "requested_amount": order.total_price,
                 "currency": getattr(order, "currency", "GEL"),
@@ -139,6 +142,10 @@ class BOGInitiatePaymentView(APIView):
 
         return Response(response_data, status=200)
 
+
+# -------------------------------
+# BOG PUBLIC KEY
+# -------------------------------
 BOG_PUBLIC_KEY_PEM = """
 -----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu4RUyAw3+CdkS3ZNILQh
@@ -151,15 +158,16 @@ PwIDAQAB
 -----END PUBLIC KEY-----
 """
 
+
 # -------------------------------
-# Callback with Signature Verification
+# CALLBACK FROM BOG
 # -------------------------------
 class BOGPaymentCallbackView(APIView):
     authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     def verify_signature(self, raw_body, signature_base64):
-        public_key_pem = BOG_PUBLIC_KEY_PEM 
+        public_key_pem = BOG_PUBLIC_KEY_PEM
         signature = base64.b64decode(signature_base64)
 
         public_key = serialization.load_pem_public_key(public_key_pem.encode())
@@ -178,54 +186,82 @@ class BOGPaymentCallbackView(APIView):
         raw_body = request.body
         callback_signature = request.headers.get("Callback-Signature")
 
-        if callback_signature:
-            if not self.verify_signature(raw_body, callback_signature):
-                return Response({"error": "Invalid signature"}, status=400)
+        if callback_signature and not self.verify_signature(raw_body, callback_signature):
+            return Response({"error": "Invalid signature"}, status=400)
 
-        data = json.loads(raw_body)
+        try:
+            data = json.loads(raw_body)
+        except Exception:
+            return Response({"error": "Invalid JSON"}, status=400)
+
         body = data.get("body", {})
+        print("BOG CALLBACK:", body)
 
-        print(body)
-
-        external_order_id = body.get("order_id") or body.get("external_order_id")
-        payment_detail = body.get("payment_detail", {})
-        transaction_id = payment_detail.get("transaction_id")
-        amount = Decimal(body.get("purchase_units", {}).get("transfer_amount", 0.0))
+        external_order_id = body.get("external_order_id") or body.get("order_id")
 
         if not external_order_id:
-            return Response({"error": "Order ID not provided"}, status=400)
+            return Response({"error": "Order ID missing"}, status=400)
 
-        # try:
-        #     order = Order.objects.get(order_number=external_order_id)
-        # except Order.DoesNotExist:
-        #     return Response({"error": "Order not found"}, status=404)
+        try:
+            order = Order.objects.get(order_number=external_order_id)
+        except Order.DoesNotExist:
+            return Response({"error": "Order not found"}, status=404)
 
-        # bog_status = body.get("order_status", {}).get("key", "pending")
-        # status_map = {
-        #     "completed": ("completed", "paid"),
-        #     "failed": ("cancelled", "failed"),
-        #     "refunded": ("completed", "refunded"),
-        #     "pending": ("pending", "pending"),
-        # }
-        # order.status, order.payment_status = status_map.get(bog_status, ("pending", "pending"))
-        # order.save()
+        payment_detail = body.get("payment_detail", {})
+        transaction_id = payment_detail.get("transaction_id", "")
 
-        # Payment.objects.update_or_create(
-        #     order=order,
-        #     defaults={
-        #         "payment_method": "bog",
-        #         "amount": amount,
-        #         "currency": getattr(order, "currency", "GEL"),
-        #         "transaction_id": transaction_id or "",
-        #         "payment_gateway_response": data,
-        #     },
-        # )
+        purchase_units = body.get("purchase_units", {}) or {}
+        transfer_amount = purchase_units.get("transfer_amount") or "0"
+        amount = Decimal(transfer_amount)
 
-        return Response({"message": "Payment callback processed successfully"}, status=200)
+        bog_status = body.get("order_status", {}).get("key", "pending")
+
+        status_map = {
+            "completed": "paid",
+            "processing": "processing",
+            "created": "pending",
+            "rejected": "failed",
+            "refund_requested": "refund_requested",
+            "refunded": "refunded",
+            "refunded_partially": "refunded",
+            "partial_completed": "partial_paid",
+            "blocked": "blocked",
+            "auth_requested": "auth_requested",
+        }
+
+        internal_status = status_map.get(bog_status, "pending")
+        order.status = internal_status
+        order.save()
+
+        method_key = payment_detail.get("transfer_method", {}).get("key", "")
+        card_type = payment_detail.get("card_type", "")
+        payer_identifier = payment_detail.get("payer_identifier", "")
+        result_code = payment_detail.get("code", "")
+        result_message = payment_detail.get("code_description", "")
+
+        Payment.objects.update_or_create(
+            order=order,
+            defaults={
+                "payment_method": method_key or "card",
+                "amount": amount,
+                "requested_amount": order.total_price,
+                "currency": getattr(order, "currency", "GEL"),
+                "transaction_id": transaction_id,
+                "status": internal_status,
+                "method_provider": method_key,
+                "card_type": card_type,
+                "payer_identifier": payer_identifier,
+                "result_code": result_code,
+                "result_message": result_message,
+                "payment_gateway_response": data,
+            },
+        )
+
+        return Response({"message": "Callback processed"}, status=200)
 
 
 # -------------------------------
-# Payment Status
+# CHECK PAYMENT STATUS / RECEIPT
 # -------------------------------
 class BOGPaymentStatusView(APIView):
     authentication_classes = []
@@ -244,7 +280,7 @@ class BOGPaymentStatusView(APIView):
 
         try:
             response = requests.get(
-                f"{settings.BOG_BASE_URL}/payments/v1/ecommerce/orders/{transaction_id}",
+                f"{settings.BOG_BASE_URL}/payments/v1/receipt/{transaction_id}",
                 headers=headers,
                 timeout=10,
             )

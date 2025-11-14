@@ -33,7 +33,15 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         event = validated_data['event']
         people_count = validated_data['people_count']
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
         
+        if user and user.is_authenticated:
+            validated_data.setdefault('customer_name', f"{getattr(user, 'firstname', '')} {getattr(user, 'lastname', '')}".strip())
+            validated_data.setdefault('customer_email', getattr(user, 'email', ''))
+            validated_data.setdefault('customer_phone', getattr(user, 'mobile', ''))
+            validated_data.setdefault('customer_country', getattr(user, 'country', ''))
+            
         base_price = event.calculate_price(people_count)
         
         discount_amount = Decimal('0.00')
@@ -76,6 +84,6 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ['id', 'order_number', 'customer', 'event', 'customer_name', 'customer_email',
                  'customer_phone', 'customer_country', 'people_count', 'event_date', 'notes',
                  'base_price', 'discount_amount', 'total_price', 'commission_amount', 'status',
-                 'payment_status', 'created_at', 'updated_at']
+                 'created_at', 'updated_at']
         read_only_fields = ['id', 'order_number', 'base_price', 'discount_amount', 'total_price',
                            'commission_amount', 'created_at', 'updated_at']
