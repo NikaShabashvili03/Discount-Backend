@@ -90,8 +90,8 @@ class BOGInitiatePaymentView(APIView):
                 "basket": basket,
             },
             "redirect_urls": {
-                "success": f"${settings.BOG_SUCCESS_URL}/{order_number}?status=success",
-                "fail": f"${settings.BOG_FAIL_URL}/{order_number}?status=fail",
+                "success": f"{settings.BOG_SUCCESS_URL}/{order_number}?status=success",
+                "fail": f"{settings.BOG_FAIL_URL}/{order_number}?status=fail",
             },
             "payment_method": [method],
             "config": {
