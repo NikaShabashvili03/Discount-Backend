@@ -10,10 +10,11 @@ from django.conf import settings
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from customer.permissions import IsCustomerAuthenticated
+from customer.middleware import CustomerSessionMiddleware
 from orders.models import Order
 from ..models.payment import Payment, PAYMENT_METHODS
-
+from ..serializers.payment import PaymentSerializer
 
 # -------------------------------
 # BOG Authentication
@@ -41,8 +42,8 @@ def get_bog_access_token(client_id, client_secret):
 # Initiate Payment
 # -------------------------------
 class BOGInitiatePaymentView(APIView):
-    authentication_classes = []
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsCustomerAuthenticated]
+    authentication_classes = [CustomerSessionMiddleware]
 
     def post(self, request):
         order_number = request.data.get("order_number")
@@ -89,8 +90,8 @@ class BOGInitiatePaymentView(APIView):
                 "basket": basket,
             },
             "redirect_urls": {
-                "success": settings.BOG_SUCCESS_URL,
-                "fail": settings.BOG_FAIL_URL,
+                "success": f"${settings.BOG_SUCCESS_URL}/{order_number}?status=success",
+                "fail": f"${settings.BOG_FAIL_URL}/{order_number}?status=fail",
             },
             "payment_method": [method],
             "config": {
@@ -264,26 +265,54 @@ class BOGPaymentCallbackView(APIView):
 # CHECK PAYMENT STATUS / RECEIPT
 # -------------------------------
 class BOGPaymentStatusView(APIView):
-    authentication_classes = []
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsCustomerAuthenticated]
+    authentication_classes = [CustomerSessionMiddleware]
 
-    def get(self, request, transaction_id):
+    def get(self, request, order_id):
         try:
-            token = get_bog_access_token(settings.BOG_PUBLIC_KEY, settings.BOG_SECRET_KEY)
-        except Exception as e:
-            return Response({"error": "Failed to authenticate with BOG", "details": str(e)}, status=500)
-
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {token}",
-        }
-
-        try:
-            response = requests.get(
-                f"{settings.BOG_BASE_URL}/payments/v1/receipt/{transaction_id}",
-                headers=headers,
-                timeout=10,
+            order = (
+                Order.objects
+                .select_related("payment") 
+                .get(order_number=order_id)
             )
-            return Response(response.json(), status=response.status_code)
-        except Exception as e:
-            return Response({"error": "Failed to fetch payment status", "details": str(e)}, status=500)
+        except Order.DoesNotExist:
+            return Response(
+                {"success": False, "message": "Order not found."},
+                status=404
+            )
+
+        payment = getattr(order, "payment", None)
+        if payment is None:
+            return Response(
+                {"success": False, "message": "Payment record not found."},
+                status=404
+            )
+
+        return Response(PaymentSerializer(payment).data)
+# -------------------------------
+# CHECK PAYMENT STATUS / RECEIPT
+# -------------------------------
+# class BOGPaymentStatusView(APIView):
+#     authentication_classes = []
+#     permission_classes = [permissions.AllowAny]
+
+#     def get(self, request, transaction_id):
+#         try:
+#             token = get_bog_access_token(settings.BOG_PUBLIC_KEY, settings.BOG_SECRET_KEY)
+#         except Exception as e:
+#             return Response({"error": "Failed to authenticate with BOG", "details": str(e)}, status=500)
+
+#         headers = {
+#             "Content-Type": "application/json",
+#             "Authorization": f"Bearer {token}",
+#         }
+
+#         try:
+#             response = requests.get(
+#                 f"{settings.BOG_BASE_URL}/payments/v1/receipt/{transaction_id}",
+#                 headers=headers,
+#                 timeout=10,
+#             )
+#             return Response(response.json(), status=response.status_code)
+#         except Exception as e:
+#             return Response({"error": "Failed to fetch payment status", "details": str(e)}, status=500)
