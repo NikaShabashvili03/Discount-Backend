@@ -267,3 +267,5 @@ BOG_FAIL_URL = os.getenv("BOG_FAIL_URL", "BOG_FAIL_URL")
 BOG_API_TOKEN = os.getenv("BOG_API_TOKEN", "BOG_API_TOKEN")
 
 BOG_CALLBACK_URL = os.getenv("BOG_CALLBACK_URL", "https://yourdomain.com/api/orders/bog/callback/")
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "YOUR_GOOGLE_CLIENT_ID_HERE")

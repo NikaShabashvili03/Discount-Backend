@@ -45,3 +45,6 @@ class CustomerRegisterSerializer(serializers.Serializer):
         )
 
         return customer
+    
+class GoogleAuthSerializer(serializers.Serializer):
+    token = serializers.CharField(required=True)

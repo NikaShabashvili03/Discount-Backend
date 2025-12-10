@@ -1,15 +1,90 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from ..permissions import AllowAny, IsCustomerAuthenticated
-from ..serializers.customer import CustomerSerializer, CustomerLoginSerializer, CustomerRegisterSerializer
+from ..serializers.customer import CustomerSerializer, CustomerLoginSerializer, CustomerRegisterSerializer, GoogleAuthSerializer
 from ..middleware import CustomerSessionMiddleware
 from django.middleware.csrf import get_token
 import uuid
 from django.utils.timezone import now
 from datetime import timedelta
-from ..models import CustomerSession, BlackList
+from ..models import CustomerSession, BlackList, Customer
 from core.utils import get_client_ip
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+from django.conf import settings
+from django.utils.crypto import get_random_string
 
+class GoogleLoginView(generics.GenericAPIView):
+    serializer_class = GoogleAuthSerializer
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        token = serializer.validated_data['token']
+        
+        try:
+            id_info = id_token.verify_oauth2_token(
+                token, 
+                google_requests.Request(), 
+                settings.GOOGLE_CLIENT_ID
+            )
+            
+            email = id_info['email']
+            first_name = id_info.get('given_name', '')
+            last_name = id_info.get('family_name', '')
+            
+        except ValueError:
+            return Response({'details': 'Invalid Google Token'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if BlackList.objects.filter(ip=get_client_ip(request)).exists():
+            return Response({'details': 'Your IP is blacklisted'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            customer = Customer.objects.get(email=email)
+            customer.last_login = now()
+            customer.save()
+        except Customer.DoesNotExist:
+            customer = Customer(
+                email=email,
+                firstname=first_name,
+                lastname=last_name,
+                country="Unknown", 
+                mobile="",         
+                email_verified_at=now() 
+            )
+            customer.password = get_random_string(32) 
+            customer.save()
+
+        session_token = str(uuid.uuid4())
+        expires_at = now() + timedelta(days=2)
+
+        session = CustomerSession.objects.create(
+            customer=customer,
+            session_token=session_token,
+            ip=get_client_ip(request),
+            expires_at=expires_at,
+        )
+
+        # 5. Prepare Response
+        customer_data = CustomerSerializer(customer).data
+        response = Response(customer_data, status=status.HTTP_200_OK)
+        
+        response.set_cookie(
+            'customer_session_token', 
+            session.session_token, 
+            expires=expires_at, 
+            samesite='None', 
+            secure=True
+        )
+        
+        csrf_token = get_token(request)
+        response['X-CSRFToken'] = csrf_token
+        
+        return response
+    
 class RegisterView(generics.GenericAPIView):
     serializer_class = CustomerRegisterSerializer
     permission_classes = [AllowAny]
