@@ -269,3 +269,6 @@ BOG_API_TOKEN = os.getenv("BOG_API_TOKEN", "BOG_API_TOKEN")
 BOG_CALLBACK_URL = os.getenv("BOG_CALLBACK_URL", "https://yourdomain.com/api/orders/bog/callback/")
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "YOUR_GOOGLE_CLIENT_ID_HERE")
+
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', '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')
+SENDGRID_EMAIL_SENDER = os.getenv('SENDGRID_EMAIL_SENDER', 'funfinder.ge@gmail.com')

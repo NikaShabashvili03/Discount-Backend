@@ -13,6 +13,9 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from django.conf import settings
 from django.utils.crypto import get_random_string
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+from orders.models.order import Order
 
 class GoogleLoginView(generics.GenericAPIView):
     serializer_class = GoogleAuthSerializer
@@ -148,7 +151,7 @@ class LoginView(generics.GenericAPIView):
         )
 
         customer_data = CustomerSerializer(customer).data
-
+        
         response = Response(customer_data, status=status.HTTP_200_OK)
         response.set_cookie(
             'customer_session_token', session.session_token, expires=expires_at, 
