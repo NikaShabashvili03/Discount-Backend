@@ -273,7 +273,7 @@ class BOGPaymentCallbackView(APIView):
             try:
                 msg_company = Mail(
                     from_email=sender_email,
-                    to_emails="i.diasamidze@gmail.com", # "order.event.company.email"
+                    to_emails="i.diasamidze@funfinder.ge", # "order.event.company.email"
                     subject=subject_company,
                     html_content=html_company
                 )
