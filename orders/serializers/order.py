@@ -11,18 +11,18 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         fields = ['event', 'customer_name', 'customer_email', 'customer_phone', 'customer_country',
                  'people_count', 'event_date', 'notes']
     
-    def validate_people_count(self, value):
-        event = self.initial_data.get('event')
-        if event:
-            try:
-                event_obj = Event.objects.get(id=event)
-                if value < event_obj.min_people or value > event_obj.max_people:
-                    raise serializers.ValidationError(
-                        f'People count must be between {event_obj.min_people} and {event_obj.max_people}'
-                    )
-            except Event.DoesNotExist:
-                raise serializers.ValidationError('Invalid event')
-        return value
+    # def validate_people_count(self, value):
+    #     event = self.initial_data.get('event')
+    #     if event:
+    #         try:
+    #             event_obj = Event.objects.get(id=event)
+    #             if value < event_obj.min_people or value > event_obj.max_people:
+    #                 raise serializers.ValidationError(
+    #                     f'People count must be between {event_obj.min_people} and {event_obj.max_people}'
+    #                 )
+    #         except Event.DoesNotExist:
+    #             raise serializers.ValidationError('Invalid event')
+    #     return value
     
     def validate_event_date(self, value):
         from django.utils import timezone

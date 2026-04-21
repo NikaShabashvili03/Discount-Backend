@@ -98,11 +98,11 @@ class PriceCalculationSerializer(serializers.Serializer):
         except Event.DoesNotExist:
             raise serializers.ValidationError('Event not found')
         
-        people_count = attrs['people_count']
-        if people_count < event.min_people or people_count > event.max_people:
-            raise serializers.ValidationError(
-                f'People count must be between {event.min_people} and {event.max_people}'
-            )
+        # people_count = attrs['people_count']
+        # if people_count < event.min_people or people_count > event.max_people:
+        #     raise serializers.ValidationError(
+        #         f'People count must be between {event.min_people} and {event.max_people}'
+        #     )
         
         return attrs
     
