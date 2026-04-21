@@ -4,7 +4,7 @@ from ..models import Customer
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = ['id', 'firstname', 'lastname', 'email']
+        fields = ['id', 'firstname', 'lastname', 'email', 'country', 'mobile']
 
 class CustomerLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -48,3 +48,20 @@ class CustomerRegisterSerializer(serializers.Serializer):
     
 class GoogleAuthSerializer(serializers.Serializer):
     token = serializers.CharField(required=True)
+
+class CustomerUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = ['firstname', 'lastname', 'country', 'mobile']
+        extra_kwargs = {
+            'firstname': {'required': False},
+            'lastname': {'required': False},
+            'country': {'required': False},
+            'mobile': {'required': False},
+        }
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance

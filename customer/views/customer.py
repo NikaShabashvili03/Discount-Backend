@@ -1,7 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from ..permissions import AllowAny, IsCustomerAuthenticated
-from ..serializers.customer import CustomerSerializer, CustomerLoginSerializer, CustomerRegisterSerializer, GoogleAuthSerializer
+from ..serializers.customer import CustomerSerializer, CustomerLoginSerializer, CustomerRegisterSerializer, GoogleAuthSerializer, CustomerUpdateSerializer
 from ..middleware import CustomerSessionMiddleware
 from django.middleware.csrf import get_token
 import uuid
@@ -165,12 +165,31 @@ class ProfileView(generics.RetrieveAPIView):
     permission_classes = [IsCustomerAuthenticated]
     serializer_class = CustomerSerializer
     authentication_classes = [CustomerSessionMiddleware]
-    
+
     def get(self, request, *args, **kwargs):
         customer = request.customer
         serializer = CustomerSerializer(customer, context={'request': request})
 
         return Response(serializer.data)
+
+class UpdateProfileView(generics.GenericAPIView):
+    permission_classes = [IsCustomerAuthenticated]
+    serializer_class = CustomerUpdateSerializer
+    authentication_classes = [CustomerSessionMiddleware]
+
+    def put(self, request, *args, **kwargs):
+        customer = request.customer
+        serializer = CustomerUpdateSerializer(customer, data=request.data, partial=False)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(CustomerSerializer(customer).data, status=status.HTTP_200_OK)
+
+    def patch(self, request, *args, **kwargs):
+        customer = request.customer
+        serializer = CustomerUpdateSerializer(customer, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(CustomerSerializer(customer).data, status=status.HTTP_200_OK)
     
 class LogoutView(generics.GenericAPIView):
     permission_classes = [IsCustomerAuthenticated]
