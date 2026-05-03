@@ -308,7 +308,7 @@ class BOGPaymentCallbackView(APIView):
             self._send_template_email(
                 sg,
                 sender_email,
-                "funfinder.ge@gmail.com",
+                "funfinder.georgia@gmail.com",
                 f"[ADMIN] New transaction #{order.order_number}",
                 {
                     "heading": "New transaction",
