@@ -1,0 +1,77 @@
+/* Email-safe styles. Inline styles in the HTML carry the desktop layout;
+   this file is only loaded by clients that support <style> blocks (Gmail web,
+   Apple Mail, iOS Mail, Yahoo). Outlook desktop ignores it. */
+
+/* Reset for clients that don't already do this */
+body, table, td, p, a, h1, h2, h3 {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    mso-line-height-rule: exactly;
+}
+table, td {
+    mso-table-lspace: 0pt;
+    mso-table-rspace: 0pt;
+    border-collapse: collapse;
+}
+img {
+    -ms-interpolation-mode: bicubic;
+    border: 0;
+    outline: none;
+    text-decoration: none;
+    height: auto;
+    line-height: 100%;
+}
+a[x-apple-data-detectors] {
+    color: inherit !important;
+    text-decoration: none !important;
+    font-size: inherit !important;
+    font-family: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+}
+
+/* Gmail dark-mode: keep colors stable */
+u + .body .gmail-blend-screen { background: #3A1D94; mix-blend-mode: screen; }
+u + .body .gmail-blend-difference { background: #000; mix-blend-mode: difference; }
+
+/* Mobile: stack two-column rows, full-width container */
+@media only screen and (max-width: 620px) {
+    .email-container {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .stack {
+        width: 100% !important;
+    }
+    .stack-col {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        box-sizing: border-box !important;
+    }
+    .stack-col + .stack-col {
+        padding-top: 18px !important;
+    }
+    .stack-center {
+        text-align: center !important;
+    }
+    .stack-center img {
+        margin: 0 auto !important;
+    }
+    .main-title {
+        font-size: 28px !important;
+        line-height: 1.15 !important;
+    }
+    .subtitle {
+        font-size: 14px !important;
+    }
+}
+
+/* Very small phones */
+@media only screen and (max-width: 380px) {
+    .main-title {
+        font-size: 24px !important;
+    }
+}

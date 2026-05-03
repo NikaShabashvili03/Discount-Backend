@@ -1,0 +1,289 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+    <meta name="color-scheme" content="light only">
+    <meta name="supported-color-schemes" content="light only">
+    <title>{{ subject|default:"Order Confirmation" }}</title>
+
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+                <o:AllowPNG/>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <style>
+        table, td, div, p, a { font-family: Arial, Helvetica, sans-serif !important; }
+    </style>
+    <![endif]-->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        {% include "email/style.css" %}
+    </style>
+</head>
+<body style="margin:0;padding:0;width:100%;background-color:#3A1D94;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+
+    <!-- Preheader (hidden, shown as preview text in inbox) -->
+    <div style="display:none;font-size:1px;color:#3A1D94;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">
+        {{ intro|default:"Your ticket is ready. Save or print it before the event." }}
+    </div>
+
+    <!-- Outer wrapper -->
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#3A1D94" style="background-color:#3A1D94;width:100%;">
+        <tr>
+            <td align="center" style="padding:32px 12px;">
+
+                <!--[if mso]>
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" align="center"><tr><td>
+                <![endif]-->
+
+                <!-- Centered 600px container -->
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" class="email-container" style="width:600px;max-width:600px;margin:0 auto;">
+
+                    <!-- Brand header -->
+                    <tr>
+                        <td align="center" style="padding:8px 24px 24px;">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td valign="middle" style="padding-right:12px;">
+                                        <img src="https://funfinder.ge/static/media/logo.f11e88da6e5f45cdace0.jpg" width="44" height="44" alt="FunFinder" style="display:block;border:0;outline:none;text-decoration:none;border-radius:10px;">
+                                    </td>
+                                    <td valign="middle" style="font-family:'Montserrat','Inter',Arial,sans-serif;font-size:18px;font-weight:800;color:#FFFFFF;letter-spacing:0.5px;line-height:1;">
+                                        FUNFINDER
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    {% if hero_image_url %}
+                    <!-- Hero image -->
+                    <tr>
+                        <td align="center" style="padding:0 16px;">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-radius:16px;overflow:hidden;">
+                                <tr>
+                                    <td align="center" background="{{ hero_image_url }}" bgcolor="#3A1D94" style="background-color:#3A1D94;background-image:url('{{ hero_image_url }}');background-size:cover;background-position:center;background-repeat:no-repeat;border-radius:16px;">
+
+                                        <!--[if gte mso 9]>
+                                        <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:568px;height:180px;">
+                                            <v:fill type="frame" src="{{ hero_image_url }}" color="#3A1D94"/>
+                                            <v:textbox style="mso-fit-shape-to-text:true" inset="0,0,0,0"><div>
+                                        <![endif]-->
+
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                            <tr>
+                                                <td align="center" style="padding:64px 32px;background:linear-gradient(135deg, rgba(58,29,148,0.55) 0%, rgba(77,41,187,0.35) 100%);">
+                                                    <p style="margin:0;font-family:'Montserrat','Inter',Arial,sans-serif;font-size:11px;font-weight:700;color:#D9D2FF;letter-spacing:2px;text-transform:uppercase;text-shadow:0 1px 4px rgba(0,0,0,0.4);">
+                                                        {{ hero_eyebrow|default:"Order confirmed" }}
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <!--[if gte mso 9]>
+                                            </div></v:textbox>
+                                        </v:rect>
+                                        <![endif]-->
+
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    {% endif %}
+
+                    <!-- Headline -->
+                    <tr>
+                        <td align="center" style="padding:32px 32px 12px;">
+                            <h1 class="main-title" style="margin:0;font-family:'Montserrat','Inter',Arial,sans-serif;font-size:36px;font-weight:800;line-height:1.1;letter-spacing:-0.5px;color:#FFFFFF;">
+                                {{ heading|default:"Order confirmation" }}
+                            </h1>
+                        </td>
+                    </tr>
+
+                    <!-- Subtitle -->
+                    <tr>
+                        <td align="center" style="padding:0 40px 32px;">
+                            <p class="subtitle" style="margin:0;font-family:'Inter',Arial,sans-serif;font-size:15px;line-height:1.55;color:#D9D2FF;">
+                                {{ intro|default:"Thank you for your purchase! Please save or print your ticket before the event." }}
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Ticket card -->
+                    <tr>
+                        <td style="padding:0 16px;">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#FFFFFF" style="background-color:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 24px 48px rgba(0,0,0,0.25);">
+
+                                <!-- Ticket main -->
+                                <tr>
+                                    <td style="padding:28px 28px 24px;">
+
+                                        <!-- Logo + artist row -->
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                            <tr>
+                                                <td valign="middle" align="left">
+                                                    <img src="https://funfinder.ge/static/media/logo.f11e88da6e5f45cdace0.jpg" width="40" height="40" alt="FunFinder" style="display:block;border:0;outline:none;text-decoration:none;border-radius:6px;">
+                                                </td>
+                                                <td valign="middle" align="right" style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:13px;line-height:1.1;color:#333333;text-transform:uppercase;letter-spacing:0.5px;">
+                                                    {{ artist_line|default:"BENNY<br>BENASSI"|safe }}
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <!-- spacer -->
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td style="font-size:0;line-height:0;height:28px;">&nbsp;</td></tr></table>
+
+                                        <!-- Location + Date -->
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="stack">
+                                            <tr>
+                                                <td valign="top" width="50%" class="stack-col" style="padding-right:12px;">
+                                                    <p style="margin:0 0 6px;font-family:'Inter',Arial,sans-serif;font-size:11px;font-weight:700;color:#4D29BB;text-transform:uppercase;letter-spacing:0.6px;">
+                                                        Location
+                                                    </p>
+                                                    <p style="margin:0 0 4px;font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:600;color:#4D29BB;line-height:1.4;">
+                                                        {{ location_name|default:"WaMu Theater" }}
+                                                    </p>
+                                                    <p style="margin:0;font-family:'Inter',Arial,sans-serif;font-size:13px;font-weight:500;color:#333333;line-height:1.5;">
+                                                        {{ location_address|default:"800 Occidental Ave S<br>Seattle, WA 98134"|safe }}
+                                                    </p>
+                                                </td>
+                                                <td valign="top" width="50%" class="stack-col" style="padding-left:12px;">
+                                                    <p style="margin:0 0 6px;font-family:'Inter',Arial,sans-serif;font-size:11px;font-weight:700;color:#4D29BB;text-transform:uppercase;letter-spacing:0.6px;">
+                                                        Date &amp; Time
+                                                    </p>
+                                                    <p style="margin:0;font-family:'Inter',Arial,sans-serif;font-size:13px;font-weight:500;color:#333333;line-height:1.5;">
+                                                        {{ event_datetime|default:"Saturday<br>November 2, 2026<br>8:00 PM"|safe }}
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <!-- spacer -->
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td style="font-size:0;line-height:0;height:24px;">&nbsp;</td></tr></table>
+
+                                        <!-- Ticket info section label -->
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                            <tr>
+                                                <td style="padding-bottom:8px;border-bottom:1px solid #eeeeee;">
+                                                    <p style="margin:0;font-family:'Inter',Arial,sans-serif;font-size:11px;font-weight:700;color:#4D29BB;text-transform:uppercase;letter-spacing:0.6px;">
+                                                        Ticket info
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <!-- Info rows -->
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top:14px;">
+                                            <tr>
+                                                <td width="100" style="padding:6px 0;font-family:'Inter',Arial,sans-serif;font-size:14px;color:#666666;">Name</td>
+                                                <td style="padding:6px 0;font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:600;color:#333333;">
+                                                    {{ customer_name|default:"Alex Law" }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td width="100" style="padding:6px 0;font-family:'Inter',Arial,sans-serif;font-size:14px;color:#666666;">Type</td>
+                                                <td style="padding:6px 0;font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:600;color:#333333;">
+                                                    {{ ticket_type|default:"General Admission" }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td width="100" style="padding:6px 0;font-family:'Inter',Arial,sans-serif;font-size:14px;color:#666666;">Quantity</td>
+                                                <td style="padding:6px 0;font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:600;color:#333333;">
+                                                    {{ quantity|default:"1" }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td width="100" style="padding:6px 0;font-family:'Inter',Arial,sans-serif;font-size:14px;color:#666666;">Price</td>
+                                                <td style="padding:6px 0;font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:700;color:#4D29BB;">
+                                                    {{ price|default:"$40.00" }}
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                    </td>
+                                </tr>
+
+                                <!-- Stub -->
+                                <tr>
+                                    <td bgcolor="#FAFAFE" style="background-color:#FAFAFE;border-top:2px dashed #E5E0F5;padding:24px 28px;">
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="stack">
+                                            <tr>
+                                                <td valign="middle" class="stack-col" style="padding-right:16px;">
+                                                    <p style="margin:0 0 6px;font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:700;color:#333333;line-height:1.35;">
+                                                        {{ event_name|default:"Benny Benassi @ WaMu Theater" }}
+                                                    </p>
+                                                    <p style="margin:0 0 4px;font-family:'Inter',Arial,sans-serif;font-size:12px;color:#666666;">
+                                                        {{ ticket_type|default:"General Admission" }}
+                                                    </p>
+                                                    <p style="margin:0;font-family:'Inter',Arial,sans-serif;font-size:12px;color:#666666;letter-spacing:0.3px;">
+                                                        Ticket #: <span style="color:#333333;font-weight:600;">{{ ticket_id|default:"A34567890" }}</span>
+                                                    </p>
+                                                </td>
+                                                <td valign="middle" align="right" width="112" class="stack-col stack-center">
+                                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/250px-QR_code_for_mobile_English_Wikipedia.svg.png" width="100" height="100" alt="QR code — {{ ticket_id|default:'A34567890' }}" style="display:block;border:0;outline:none;text-decoration:none;width:100px;height:100px;">
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- CTA -->
+                    <tr>
+                        <td align="center" style="padding:28px 16px 8px;">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td align="center" bgcolor="#FFFFFF" style="border-radius:999px;background-color:#FFFFFF;">
+                                        <a href="{{ ticket_url }}" target="_blank" style="display:inline-block;padding:14px 32px;font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:700;color:#4D29BB;text-decoration:none;border-radius:999px;letter-spacing:0.3px;">
+                                            View ticket online
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td align="center" style="padding:24px 32px 8px;">
+                            <p style="margin:0;font-family:'Inter',Arial,sans-serif;font-size:12px;line-height:1.6;color:#B5A8E8;">
+                                Need help? Reply to this email and our team will get back to you.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" style="padding:0 32px 32px;">
+                            <p style="margin:0;font-family:'Inter',Arial,sans-serif;font-size:11px;line-height:1.6;color:#8B7AC4;">
+                                &copy; {{ year|default:"2026" }} FunFinder. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+
+                <!--[if mso]>
+                </td></tr></table>
+                <![endif]-->
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

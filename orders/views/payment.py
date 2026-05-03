@@ -7,6 +7,7 @@ import requests
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from django.conf import settings
+from django.template.loader import render_to_string
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -186,6 +187,67 @@ class BOGPaymentCallbackView(APIView):
         except Exception:
             return False
 
+    def _build_email_context(self, order: Order):
+        """Shared context for the order_confirmation.html template."""
+        currency = getattr(order, "currency", "GEL")
+        event = getattr(order, "event", None)
+        event_name = event.name if event else "N/A"
+
+        # Primary event image → absolute URL (blank if none).
+        hero_image_url = ""
+        if event is not None:
+            primary = event.images.filter(is_primary=True).first()
+            if primary and primary.image:
+                try:
+                    rel = primary.image.url
+                except ValueError:
+                    rel = ""
+                if rel:
+                    if rel.startswith("http://") or rel.startswith("https://"):
+                        hero_image_url = rel
+                    else:
+                        site = getattr(settings, "SITE_URL", "https://funfinder.ge").rstrip("/")
+                        hero_image_url = f"{site}{rel}"
+
+        location_name = ""
+        location_address = ""
+        if event is not None:
+            location_name = getattr(getattr(event, "city", None), "name", "") or ""
+            location_address = getattr(event, "location", "") or ""
+
+        event_datetime = ""
+        if getattr(order, "event_date", None):
+            event_datetime = order.event_date.strftime("%A<br>%B %d, %Y<br>%I:%M %p")
+
+        order_year = order.created_at.year if getattr(order, "created_at", None) else 2026
+
+        return {
+            "customer_name": order.customer_name,
+            "event_name": event_name,
+            "artist_line": event_name,
+            "location_name": location_name,
+            "location_address": location_address,
+            "event_datetime": event_datetime,
+            "ticket_type": "General Admission",
+            "quantity": str(order.people_count),
+            "price": f"{order.total_price} {currency}",
+            "ticket_id": order.order_number,
+            "ticket_url": f"https://funfinder.ge/orders/{order.order_number}",
+            "hero_image_url": hero_image_url,
+            "year": str(order_year),
+        }
+
+    def _send_template_email(self, sg, sender_email, to_email, subject, ctx_overrides, base_ctx):
+        ctx = {**base_ctx, **ctx_overrides, "subject": subject}
+        html = render_to_string("email/order_confirmation.html", ctx)
+        msg = Mail(
+            from_email=sender_email,
+            to_emails=to_email,
+            subject=subject,
+            html_content=html,
+        )
+        sg.send(msg)
+
     def send_success_email(self, order: Order):
         if not settings.SENDGRID_API_KEY:
             print("SendGrid API Key not set, skipping email.")
@@ -194,135 +256,67 @@ class BOGPaymentCallbackView(APIView):
         sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
         sender_email = settings.SENDGRID_EMAIL_SENDER
 
-        currency = getattr(order, 'currency', 'GEL')
-        event_name = order.event.description if hasattr(order, 'event') else 'N/A'
-        company_name = order.event.company.name if hasattr(order, 'event') and hasattr(order.event, 'company') else 'Unknown Company'
-        
+        base_ctx = self._build_email_context(order)
+        event_name = base_ctx["event_name"]
+        company_name = (
+            order.event.company.name
+            if getattr(order, "event", None) and getattr(order.event, "company", None)
+            else "Unknown Company"
+        )
 
-        subject_customer = f"Payment Successful - Order #{order.order_number}"
-        html_customer = f"""
-            <html>
-                <body style="font-family: Arial, sans-serif; color: #333;">
-                    <h2 style="color: #4CAF50;">Payment Successful!</h2>
-                    <p>Dear {order.customer_name},</p>
-                    <p>Thank you for your payment. Your order has been successfully processed.</p>
-                    
-                    <table style="width: 100%; max-width: 600px; border-collapse: collapse; margin-top: 20px;">
-                        <tr style="background-color: #f9f9f9;">
-                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Order Number</th>
-                            <td style="padding: 10px; border: 1px solid #ddd;">{order.order_number}</td>
-                        </tr>
-                        <tr>
-                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Amount Paid</th>
-                            <td style="padding: 10px; border: 1px solid #ddd;">{order.total_price} {currency}</td>
-                        </tr>
-                        <tr style="background-color: #f9f9f9;">
-                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Event</th>
-                            <td style="padding: 10px; border: 1px solid #ddd;">{event_name}</td>
-                        </tr>
-                    </table>
-                    <p style="margin-top: 20px;">We hope you have a great time!</p>
-                </body>
-            </html>
-        """
-        
+        # Customer email
         try:
-            msg_customer = Mail(
-                from_email=sender_email,
-                to_emails=order.customer_email,
-                subject=subject_customer,
-                html_content=html_customer
+            self._send_template_email(
+                sg,
+                sender_email,
+                order.customer_email,
+                f"Your FunFinder ticket — {event_name}",
+                {
+                    "heading": "Order confirmation",
+                    "intro": f"Thank you for your purchase, {order.customer_name}! Please save or print your ticket before the event.",
+                    "hero_eyebrow": "Order confirmed",
+                },
+                base_ctx,
             )
-            sg.send(msg_customer)
         except Exception as e:
             print(f"Failed to send Customer email: {str(e)}")
 
-
-        if hasattr(order, 'event') and hasattr(order.event, 'company') and order.event.company.email:
-            subject_company = f"New Order Received - Order #{order.order_number}"
-            html_company = f"""
-                <html>
-                    <body style="font-family: Arial, sans-serif; color: #333;">
-                        <h2 style="color: #2196F3;">New Order Received</h2>
-                        <p>Hello {company_name},</p>
-                        <p>Good news! You have received a new booking/order via FunFinder.</p>
-                        
-                        <table style="width: 100%; max-width: 600px; border-collapse: collapse; margin-top: 20px;">
-                            <tr style="background-color: #f9f9f9;">
-                                <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Product/Event</th>
-                                <td style="padding: 10px; border: 1px solid #ddd;">{event_name}</td>
-                            </tr>
-                            <tr>
-                                <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Customer Name</th>
-                                <td style="padding: 10px; border: 1px solid #ddd;">{order.customer_name}</td>
-                            </tr>
-                            <tr style="background-color: #f9f9f9;">
-                                <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Customer Email</th>
-                                <td style="padding: 10px; border: 1px solid #ddd;">{order.customer_email}</td>
-                            </tr>
-                            <tr>
-                                <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Order Total</th>
-                                <td style="padding: 10px; border: 1px solid #ddd;">{order.total_price} {currency}</td>
-                            </tr>
-                        </table>
-                        <p style="margin-top: 20px;">Please check your dashboard for more details.</p>
-                    </body>
-                </html>
-            """
-            
+        # Company email
+        if (
+            getattr(order, "event", None)
+            and getattr(order.event, "company", None)
+            and order.event.company.email
+        ):
             try:
-                msg_company = Mail(
-                    from_email=sender_email,
-                    to_emails="i.diasamidze@funfinder.ge", # "order.event.company.email"
-                    subject=subject_company,
-                    html_content=html_company
+                self._send_template_email(
+                    sg,
+                    sender_email,
+                    "i.diasamidze@funfinder.ge",  # order.event.company.email
+                    f"New booking — {event_name}",
+                    {
+                        "heading": "New booking received",
+                        "intro": f"Hello {company_name}, you have a new paid booking from {order.customer_name} via FunFinder.",
+                        "hero_eyebrow": "New booking",
+                    },
+                    base_ctx,
                 )
-                sg.send(msg_company)
             except Exception as e:
                 print(f"Failed to send Company email: {str(e)}")
 
-
-        subject_admin = f"[ADMIN] New Transaction - #{order.order_number}"
-        html_admin = f"""
-            <html>
-                <body style="font-family: Arial, sans-serif; color: #333;">
-                    <h2 style="color: #FF9800;">New Transaction Alert</h2>
-                    <p>A new payment has been successfully processed.</p>
-                    
-                    <table style="width: 100%; max-width: 600px; border-collapse: collapse; margin-top: 20px;">
-                        <tr style="background-color: #f2f2f2;">
-                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Order ID</th>
-                            <td style="padding: 10px; border: 1px solid #ddd;">{order.order_number}</td>
-                        </tr>
-                        <tr>
-                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Customer</th>
-                            <td style="padding: 10px; border: 1px solid #ddd;">{order.customer_name} ({order.customer_email})</td>
-                        </tr>
-                        <tr style="background-color: #f2f2f2;">
-                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Vendor</th>
-                            <td style="padding: 10px; border: 1px solid #ddd;">{company_name}</td>
-                        </tr>
-                        <tr>
-                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Amount</th>
-                            <td style="padding: 10px; border: 1px solid #ddd;">{order.total_price} {currency}</td>
-                        </tr>
-                        <tr style="background-color: #f2f2f2;">
-                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Timestamp</th>
-                            <td style="padding: 10px; border: 1px solid #ddd;">{order.created_at if hasattr(order, 'created_at') else 'Now'}</td>
-                        </tr>
-                    </table>
-                </body>
-            </html>
-        """
-        
+        # Admin email
         try:
-            msg_admin = Mail(
-                from_email=sender_email,
-                to_emails='funfinder.ge@gmail.com',
-                subject=subject_admin,
-                html_content=html_admin
+            self._send_template_email(
+                sg,
+                sender_email,
+                "funfinder.ge@gmail.com",
+                f"[ADMIN] New transaction #{order.order_number}",
+                {
+                    "heading": "New transaction",
+                    "intro": f"Payment processed for {order.customer_name} ({order.customer_email}) — vendor: {company_name}.",
+                    "hero_eyebrow": "Admin alert",
+                },
+                base_ctx,
             )
-            sg.send(msg_admin)
             print(f"All emails processed for Order #{order.order_number}")
         except Exception as e:
             print(f"Failed to send Admin email: {str(e)}")

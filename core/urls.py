@@ -3,12 +3,18 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls.i18n import i18n_patterns
-from .views import doc_admin_view, doc_customer_view, doc_staff_view
+from .views import (
+    doc_admin_view,
+    doc_customer_view,
+    doc_staff_view,
+    sendgrid_test_view,
+)
 
 urlpatterns = [
     path('docs/admin', doc_admin_view, name='doc'),
     path('docs/customer', doc_customer_view, name='doc'),
     path('docs/staff', doc_staff_view, name='doc'),
+    path('test/sendgrid', sendgrid_test_view, name='sendgrid-test'),
     path('api/v5/', include('orders.urls'))
 ]
 
