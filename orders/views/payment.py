@@ -190,10 +190,10 @@ class BOGPaymentCallbackView(APIView):
     def _build_email_context(self, order: Order):
         """Shared context for the order_confirmation.html template."""
         currency = getattr(order, "currency", "GEL")
-        event = getattr(order.event.category, "activity", None)
-        ticket_type = getattr(order, "", "Unknown")
+        event = getattr(order, "event", None)
+        ticket_type = event.category.activity if event else "Unknown"
         event_name = event.name if event else "N/A"
-
+    
         # Primary event image → absolute URL (blank if none).
         hero_image_url = ""
         if event is not None:
@@ -229,7 +229,7 @@ class BOGPaymentCallbackView(APIView):
             "location_name": location_name,
             "location_address": location_address,
             "event_datetime": event_datetime,
-            "ticket_type": "General Admission",
+            "ticket_type": ticket_type,
             "quantity": str(order.people_count),
             "price": f"{order.total_price} {currency}",
             "ticket_id": order.order_number,
