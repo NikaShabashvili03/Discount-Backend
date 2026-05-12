@@ -260,6 +260,9 @@ BOG_TERMINAL_ID = os.getenv("BOG_TERMINAL_ID", "BOG_TERMINAL_ID")
 BOG_PUBLIC_KEY = os.getenv("BOG_PUBLIC_KEY", "YOUR_PUBLIC_KEY_HERE")
 BOG_SECRET_KEY = os.getenv("BOG_SECRET_KEY", "YOUR_SECRET_KEY_HERE")
 
+# Google Pay gatewayMerchantId (provided by BOG, used for the Google Pay button config)
+BOG_GOOGLE_PAY_MERCHANT_ID = os.getenv("BOG_GOOGLE_PAY_MERCHANT_ID", "")
+
 
 BOG_SUCCESS_URL = os.getenv("BOG_SUCCESS_URL", "BOG_SUCCESS_URL")
 BOG_FAIL_URL = os.getenv("BOG_FAIL_URL", "BOG_FAIL_URL")

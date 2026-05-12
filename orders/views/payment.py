@@ -149,6 +149,149 @@ class BOGInitiatePaymentView(APIView):
 
 
 # -------------------------------
+# Initiate Google Pay Payment (external button on merchant site)
+# -------------------------------
+class BOGGooglePayInitiateView(APIView):
+    """
+    Initiates a BOG payment for an order paid with Google Pay via the
+    merchant-hosted Google Pay button.
+
+    The frontend renders the Google Pay button configured with:
+        {
+            "type": "PAYMENT_GATEWAY",
+            "parameters": {
+                "gateway": "georgiancard",
+                "gatewayMerchantId": settings.BOG_GOOGLE_PAY_MERCHANT_ID
+            }
+        }
+    and posts the resulting Google Pay token here.
+    """
+    permission_classes = [IsCustomerAuthenticated]
+    authentication_classes = [CustomerSessionMiddleware]
+
+    def post(self, request):
+        order_number = request.data.get("order_number")
+        google_pay_token = request.data.get("google_pay_token")
+
+        if not order_number:
+            return Response({"error": "order_number is required"}, status=400)
+
+        if not google_pay_token:
+            return Response({"error": "google_pay_token is required"}, status=400)
+
+        try:
+            order = Order.objects.get(order_number=order_number)
+        except Order.DoesNotExist:
+            return Response({"error": "Order not found."}, status=404)
+
+        if order.status == "paid":
+            return Response({"error": "Order already paid."}, status=400)
+
+        try:
+            token = get_bog_access_token(settings.BOG_PUBLIC_KEY, settings.BOG_SECRET_KEY)
+        except Exception as e:
+            return Response({"error": "Failed to authenticate with BOG", "details": str(e)}, status=500)
+
+        basket = [
+            {
+                "product_id": str(order.id),
+                "description": order.event.description,
+                "quantity": 1,
+                "unit_price": float(order.total_price),
+            }
+        ]
+
+        payload = {
+            "callback_url": settings.BOG_CALLBACK_URL,
+            "external_order_id": order.order_number,
+            "application_type": "web",
+            "purchase_units": {
+                "currency": getattr(order, "currency", "GEL"),
+                "total_amount": float(order.total_price),
+                "basket": basket,
+            },
+            "redirect_urls": {
+                "success": f"{settings.BOG_SUCCESS_URL}/{order_number}?status=success",
+                "fail": f"{settings.BOG_FAIL_URL}/{order_number}?status=fail",
+            },
+            "payment_method": ["google_pay"],
+            "config": {
+                "theme": "light",
+                "capture": "automatic",
+                "google_pay": {
+                    "external": True,
+                    "google_pay_token": google_pay_token,
+                },
+            },
+            "buyer": {
+                "full_name": order.customer_name,
+                "masked_email": order.customer_email,
+                "masked_phone": order.customer_phone,
+            },
+        }
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}",
+            "Accept-Language": "ka",
+            "Idempotency-Key": str(uuid.uuid4()),
+        }
+
+        try:
+            response = requests.post(
+                f"{settings.BOG_BASE_URL}/payments/v1/ecommerce/orders",
+                json=payload,
+                headers=headers,
+                timeout=10,
+            )
+            response_data = response.json()
+        except Exception:
+            return Response({"error": "Failed to connect to BOG"}, status=500)
+
+        if not (200 <= response.status_code < 300):
+            return Response({"error": "Payment initiation failed", "details": response_data},
+                            status=response.status_code)
+
+        Payment.objects.update_or_create(
+            order=order,
+            defaults={
+                "payment_method": "google_pay",
+                "amount": order.total_price,
+                "requested_amount": order.total_price,
+                "currency": getattr(order, "currency", "GEL"),
+                "transaction_id": response_data.get("id", ""),
+                "payment_gateway_response": response_data,
+                "capture_type": payload.get("config", {}).get("capture", "manual"),
+            },
+        )
+
+        return Response(response_data, status=200)
+
+
+# -------------------------------
+# Google Pay button configuration (for the frontend)
+# -------------------------------
+class BOGGooglePayConfigView(APIView):
+    """
+    Returns the tokenizationSpecification the frontend needs to render the
+    Google Pay button so the gatewayMerchantId is not hard-coded in the JS.
+    """
+    permission_classes = [IsCustomerAuthenticated]
+    authentication_classes = [CustomerSessionMiddleware]
+
+    def get(self, request):
+        return Response({
+            "tokenization_specification": {
+                "type": "PAYMENT_GATEWAY",
+                "parameters": {
+                    "gateway": "georgiancard",
+                    "gatewayMerchantId": settings.BOG_GOOGLE_PAY_MERCHANT_ID,
+                },
+            },
+        })
+
+
+# -------------------------------
 # BOG PUBLIC KEY
 # -------------------------------
 BOG_PUBLIC_KEY_PEM = """
