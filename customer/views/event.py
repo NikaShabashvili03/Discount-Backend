@@ -14,7 +14,7 @@ class EventListView(generics.ListAPIView):
         city__is_active=True,
         city__country__is_active=True,
         category__is_active=True
-    ).select_related('city', 'company', 'category', 'city__country')
+    ).select_related('city', 'company', 'category', 'city__country').with_review_stats()
     serializer_class = EventListSerializer
     permission_classes = [permissions.AllowAny]
     authentication_classes = []
@@ -29,7 +29,7 @@ class EventDetailView(generics.RetrieveAPIView):
         city__is_active=True,
         city__country__is_active=True,
         category__is_active=True
-    ).select_related('city', 'company', 'category', 'city__country')
+    ).select_related('city', 'company', 'category', 'city__country').with_review_stats()
     serializer_class = EventDetailSerializer
     permission_classes = [permissions.AllowAny]
     authentication_classes = []
@@ -54,13 +54,13 @@ class PopularEventsView(generics.ListAPIView):
             city__is_active=True,
             city__country__is_active=True,
             category__is_active=True
-        ).select_related('category', 'city', 'city__country', 'company')[:10]
+        ).select_related('category', 'city', 'city__country', 'company').with_review_stats()[:10]
 
 class FeaturedEventsView(generics.ListAPIView):
     serializer_class = EventListSerializer
     permission_classes = [permissions.AllowAny]
     authentication_classes = []
-    
+
     def get_queryset(self):
         return Event.objects.filter(
             is_active=True,
@@ -68,13 +68,13 @@ class FeaturedEventsView(generics.ListAPIView):
             city__is_active=True,
             city__country__is_active=True,
             category__is_active=True
-        ).select_related('category', 'city', 'city__country', 'company')[:10]
+        ).select_related('category', 'city', 'city__country', 'company').with_review_stats()[:10]
 
 class DiscountedEventsView(generics.ListAPIView):
     serializer_class = EventListSerializer
     permission_classes = [permissions.AllowAny]
     authentication_classes = []
-    
+
     def get_queryset(self):
         now = timezone.now()
         return Event.objects.filter(
@@ -85,7 +85,7 @@ class DiscountedEventsView(generics.ListAPIView):
             city__is_active=True,
             city__country__is_active=True,
             category__is_active=True
-        ).distinct().select_related('category', 'city', 'city__country', 'company')
+        ).distinct().select_related('category', 'city', 'city__country', 'company').with_review_stats()
     
 
 class PriceCalculationView(APIView):
@@ -113,6 +113,6 @@ class SearchView(APIView):
             city__is_active=True,
             city__country__is_active=True,
             category__is_active=True
-        )[:10]
+        ).with_review_stats()[:10]
         
         return Response(EventListSerializer(events, many=True).data)

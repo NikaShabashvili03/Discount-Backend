@@ -3,9 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Django migrations
-**/migrations/
-!**/migrations/__init__.py
+# Django migrations are tracked in git so schema changes are reviewable
+# and dev/staging/prod stay in sync. Generated files (__pycache__) below.
 
 # Virtual environment
 venv/

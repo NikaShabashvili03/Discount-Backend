@@ -71,17 +71,28 @@ class EventListSerializer(serializers.ModelSerializer):
         return obj.reviews.filter(is_approved=True, is_flagged=False)
 
     def get_average_rating(self, obj):
-        avg = self._approved_reviews(obj).aggregate(avg=Avg('rating'))['avg']
+        avg = getattr(obj, 'avg_rating', None)
+        if avg is None and not hasattr(obj, 'avg_rating'):
+            avg = self._approved_reviews(obj).aggregate(avg=Avg('rating'))['avg']
         return round(avg, 2) if avg is not None else 0
 
     def get_rating_count(self, obj):
-        return self._approved_reviews(obj).count()
+        count = getattr(obj, 'review_count', None)
+        if count is None:
+            count = self._approved_reviews(obj).count()
+        return count
 
     def get_good_reviews_count(self, obj):
-        return self._approved_reviews(obj).filter(mark='good').count()
+        count = getattr(obj, 'good_count', None)
+        if count is None:
+            count = self._approved_reviews(obj).filter(mark='good').count()
+        return count
 
     def get_bad_reviews_count(self, obj):
-        return self._approved_reviews(obj).filter(mark='bad').count()
+        count = getattr(obj, 'bad_count', None)
+        if count is None:
+            count = self._approved_reviews(obj).filter(mark='bad').count()
+        return count
 
 class EventDetailSerializer(EventListSerializer):
     images = EventImageSerializer(many=True, read_only=True)

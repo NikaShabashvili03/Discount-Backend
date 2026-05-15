@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Avg, Count, Q
 from staff.models import Company
 from decimal import Decimal
 from django.core.validators import MinValueValidator, MaxValueValidator, FileExtensionValidator
@@ -12,6 +13,18 @@ def upload_service_image(instance, filename):
 
 def upload_service_video(instance, filename):
     return image_upload(instance, filename, 'service_videos/')
+
+
+class EventQuerySet(models.QuerySet):
+    def with_review_stats(self):
+        approved = Q(reviews__is_approved=True, reviews__is_flagged=False)
+        return self.annotate(
+            avg_rating=Avg('reviews__rating', filter=approved),
+            review_count=Count('reviews', filter=approved),
+            good_count=Count('reviews', filter=approved & Q(reviews__mark='good')),
+            bad_count=Count('reviews', filter=approved & Q(reviews__mark='bad')),
+        )
+
 
 class Event(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="events")
@@ -42,10 +55,12 @@ class Event(models.Model):
 
     views_count = models.IntegerField(default=0)
     bookings_count = models.IntegerField(default=0)
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
+    objects = EventQuerySet.as_manager()
+
     class Meta:
         ordering = ['-created_at']
     
