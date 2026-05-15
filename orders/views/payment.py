@@ -366,8 +366,15 @@ class BOGGooglePayInitiateView(APIView):
                 "BOG google-pay non-2xx order=%s status=%s body=%s payload=%s",
                 order_number, response.status_code, response_data, safe_preview,
             )
-            return Response({"error": "Payment initiation failed", "details": response_data},
-                            status=response.status_code)
+            return Response(
+                {
+                    "error": "Payment initiation failed",
+                    "bog_status": response.status_code,
+                    "bog_merchant_id": settings.BOG_GOOGLE_PAY_MERCHANT_ID,
+                    "details": response_data,
+                },
+                status=response.status_code,
+            )
 
         Payment.objects.update_or_create(
             order=order,

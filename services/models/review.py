@@ -16,6 +16,7 @@ class Review(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        unique_together = ('event', 'customer')
 
     def __str__(self):
         return f"Review {self.id} | event={self.event_id} | {self.rating}*"
