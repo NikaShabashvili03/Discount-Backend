@@ -211,22 +211,21 @@ def _staff_event_or_403(request, event_id):
     return event, None
 
 
+# services_eventvideo table is not present on prod, so video CRUD is disabled
+# at the view layer.
+def _video_unavailable():
+    return Response(
+        {'detail': 'Video uploads are temporarily unavailable.'},
+        status=status.HTTP_503_SERVICE_UNAVAILABLE,
+    )
+
+
 class CompanyEventVideoUploadView(APIView):
     permission_classes = [IsStaffAuthenticated]
     authentication_classes = [StaffSessionMiddleware]
 
     def post(self, request, event_id):
-        event, err = _staff_event_or_403(request, event_id)
-        if err is not None:
-            return err
-
-        serializer = EventVideoUploadSerializer(
-            data=request.data, context={'event': event}
-        )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return _video_unavailable()
 
 
 class CompanyEventVideoDeleteAPIView(APIView):
@@ -234,13 +233,7 @@ class CompanyEventVideoDeleteAPIView(APIView):
     authentication_classes = [StaffSessionMiddleware]
 
     def delete(self, request, event_id, video_id):
-        event, err = _staff_event_or_403(request, event_id)
-        if err is not None:
-            return err
-
-        video = get_object_or_404(EventVideo, id=video_id, event=event)
-        video.delete()
-        return Response({"details": "Video Deleted Successfuly"})
+        return _video_unavailable()
 
 
 class CompanyEventVideoUpdateAPIView(APIView):
@@ -248,21 +241,7 @@ class CompanyEventVideoUpdateAPIView(APIView):
     authentication_classes = [StaffSessionMiddleware]
 
     def put(self, request, event_id, video_id):
-        return self._update(request, event_id, video_id, partial=False)
+        return _video_unavailable()
 
     def patch(self, request, event_id, video_id):
-        return self._update(request, event_id, video_id, partial=True)
-
-    def _update(self, request, event_id, video_id, partial):
-        event, err = _staff_event_or_403(request, event_id)
-        if err is not None:
-            return err
-
-        video = get_object_or_404(EventVideo, id=video_id, event=event)
-        serializer = EventVideoUpdateSerializer(
-            video, data=request.data, partial=partial
-        )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=200)
-        return Response(serializer.errors, status=400)
+        return _video_unavailable()
