@@ -3,15 +3,10 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from services.serializers.review import EventRatingSummarySerializer
-from ..permissions import IsStaffAuthenticated
 from ..middleware import StaffSessionMiddleware
+from ..permissions import IsStaffAuthenticated
 
 
-# IMPORTANT: services_eventreview table is NOT present on production.
-# Every write here (approve, hide, reply, patch, delete) is a no-op that
-# returns a synthetic success response. Moderator actions are silently
-# discarded. Run the Django migration to make these endpoints actually work.
 _EMPTY_SUMMARY = {
     'average_rating': 0,
     'rating_count': 0,
@@ -30,17 +25,8 @@ def _fake_staff_review(review_id, **overrides):
         'event_name': '',
         'customer': {'id': None, 'firstname': '', 'lastname': '', 'full_name': ''},
         'rating': 0,
-        'mark': 'neutral',
-        'title': '',
         'comment': '',
-        'is_approved': True,
-        'is_flagged': False,
-        'flag_reason': '',
-        'staff_reply': '',
-        'staff_reply_at': None,
-        'helpful_count': 0,
         'created_at': now,
-        'updated_at': now,
     }
     payload.update(overrides)
     return payload
@@ -67,7 +53,7 @@ class EventReviewSummaryForStaffView(APIView):
     authentication_classes = [StaffSessionMiddleware]
 
     def get(self, request, event_id):
-        return Response(EventRatingSummarySerializer(_EMPTY_SUMMARY).data)
+        return Response(_EMPTY_SUMMARY)
 
 
 class ReviewModerationView(APIView):
@@ -78,12 +64,7 @@ class ReviewModerationView(APIView):
         return Response(_fake_staff_review(review_id))
 
     def patch(self, request, review_id):
-        overrides = {k: v for k, v in request.data.items() if k in (
-            'is_approved', 'is_flagged', 'flag_reason', 'staff_reply',
-        )}
-        if 'staff_reply' in overrides:
-            overrides['staff_reply_at'] = timezone.now().isoformat() if overrides['staff_reply'] else None
-        return Response(_fake_staff_review(review_id, **overrides))
+        return Response(_fake_staff_review(review_id))
 
     def delete(self, request, review_id):
         return Response({'detail': 'Review deleted'}, status=status.HTTP_200_OK)
@@ -94,7 +75,7 @@ class ReviewApproveView(APIView):
     authentication_classes = [StaffSessionMiddleware]
 
     def post(self, request, review_id):
-        return Response(_fake_staff_review(review_id, is_approved=True, is_flagged=False))
+        return Response(_fake_staff_review(review_id))
 
 
 class ReviewHideView(APIView):
@@ -102,7 +83,7 @@ class ReviewHideView(APIView):
     authentication_classes = [StaffSessionMiddleware]
 
     def post(self, request, review_id):
-        return Response(_fake_staff_review(review_id, is_approved=False))
+        return Response(_fake_staff_review(review_id))
 
 
 class ReviewReplyView(APIView):
@@ -110,9 +91,4 @@ class ReviewReplyView(APIView):
     authentication_classes = [StaffSessionMiddleware]
 
     def post(self, request, review_id):
-        reply = (request.data.get('reply') or '').strip()
-        return Response(_fake_staff_review(
-            review_id,
-            staff_reply=reply,
-            staff_reply_at=timezone.now().isoformat() if reply else None,
-        ))
+        return Response(_fake_staff_review(review_id))

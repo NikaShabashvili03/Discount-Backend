@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from services.models import Event, EventImage, EventVideo, Discount, CompanyCategory, EventReview
+from services.models import Event, EventImage, EventVideo, Discount, CompanyCategory
 from .category import CategorySerializer
 from .city import CitySerializer
 from decimal import Decimal
