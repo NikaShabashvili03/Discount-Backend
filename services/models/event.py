@@ -69,11 +69,8 @@ class Event(models.Model):
         return f"{self.id} | {self.name}"
     
     def calculate_price(self, people_count):
-        if people_count < self.min_people:
-            people_count = self.min_people
-        elif people_count > self.max_people:
-            people_count = self.max_people
-        
+        if people_count < 1:
+            people_count = 1
         total_price = self.base_price + (self.price_per_person * (people_count - 1))
         return total_price
     
