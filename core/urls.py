@@ -14,9 +14,11 @@ urlpatterns = [
     path('docs/admin', doc_admin_view, name='doc'),
     path('docs/customer', doc_customer_view, name='doc'),
     path('docs/staff', doc_staff_view, name='doc'),
-    path('test/sendgrid', sendgrid_test_view, name='sendgrid-test'),
     path('api/v5/', include('orders.urls'))
 ]
+
+if settings.DEBUG:
+    urlpatterns += [path('test/sendgrid', sendgrid_test_view, name='sendgrid-test')]
 
 urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),

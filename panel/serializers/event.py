@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from services.models import Event, EventImage, Discount, CompanyCategory
+from services.models import Event, EventImage, EventVideo, Discount, CompanyCategory
+from services.serializers.event import EventVideoSerializer
 from .category import CategorySerializer
 from staff.models.staff import Company, CompanyStaff
 from .city import CitySerializer
@@ -60,10 +61,11 @@ class EventListSerializer(serializers.ModelSerializer):
     
 class EventDetailSerializer(EventListSerializer):
     images = EventImageSerializer(many=True, read_only=True)
+    videos = EventVideoSerializer(many=True, read_only=True)
     discounts = DiscountSerializer(many=True, read_only=True)
-    
+
     class Meta(EventListSerializer.Meta):
-        fields = EventListSerializer.Meta.fields + ['images', 'discounts']
+        fields = EventListSerializer.Meta.fields + ['images', 'videos', 'discounts']
 
 class EventCreateSerializer(serializers.ModelSerializer):
     company_id = serializers.IntegerField(write_only=True, required=False)
@@ -235,3 +237,26 @@ class EventImageUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventImage
         fields = ['id', 'image', 'alt_text', 'is_primary', 'order']
+
+
+class EventVideoUploadSerializer(serializers.ModelSerializer):
+    # NOTE: we intentionally do NOT redeclare `video = serializers.FileField(...)`.
+    # An explicit declaration replaces the model field at the serializer layer
+    # and silently drops the model's FileExtensionValidator, allowing .exe/.php
+    # uploads to slip past the allowlist. Letting DRF infer the field from the
+    # model preserves the validator.
+    class Meta:
+        model = EventVideo
+        fields = ['id', 'video', 'alt_text', 'is_primary', 'order']
+        extra_kwargs = {'video': {'required': True}}
+
+    def create(self, validated_data):
+        event = self.context['event']
+        return EventVideo.objects.create(event=event, **validated_data)
+
+
+class EventVideoUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventVideo
+        fields = ['id', 'video', 'alt_text', 'is_primary', 'order']
+        extra_kwargs = {'video': {'required': False}}

@@ -4,7 +4,17 @@ from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from services.models import Event
-from ..serializers.event import EventListSerializer, EventDetailSerializer, AdminEventCreateSerializer, EventImageUploadSerializer, EventImage, EventImageUpdateSerializer
+from ..serializers.event import (
+    EventListSerializer,
+    EventDetailSerializer,
+    AdminEventCreateSerializer,
+    EventImageUploadSerializer,
+    EventImage,
+    EventImageUpdateSerializer,
+    EventVideoUploadSerializer,
+    EventVideoUpdateSerializer,
+)
+from services.models import EventVideo
 from services.filters.event import EventFilter
 from panel.permissions import IsAdminAuthenticated
 from panel.middleware import AdminSessionMiddleware
@@ -145,6 +155,55 @@ class AdminEventImageUpdateAPIView(APIView):
 
         serializer = EventImageUpdateSerializer(
             image, data=request.data, partial=partial
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=200)
+        return Response(serializer.errors, status=400)
+
+
+class AdminEventVideoUploadView(APIView):
+    permission_classes = [IsAdminAuthenticated]
+    authentication_classes = [AdminSessionMiddleware]
+
+    def post(self, request, event_id):
+        event = get_object_or_404(Event, id=event_id)
+        serializer = EventVideoUploadSerializer(
+            data=request.data, context={'event': event}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdminEventVideoDeleteAPIView(APIView):
+    permission_classes = [IsAdminAuthenticated]
+    authentication_classes = [AdminSessionMiddleware]
+
+    def delete(self, request, event_id, video_id):
+        event = get_object_or_404(Event, id=event_id)
+        video = get_object_or_404(EventVideo, id=video_id, event=event)
+        video.delete()
+        return Response({"details": "Video Deleted Successfuly"})
+
+
+class AdminEventVideoUpdateAPIView(APIView):
+    permission_classes = [IsAdminAuthenticated]
+    authentication_classes = [AdminSessionMiddleware]
+
+    def put(self, request, event_id, video_id):
+        return self._update(request, event_id, video_id, partial=False)
+
+    def patch(self, request, event_id, video_id):
+        return self._update(request, event_id, video_id, partial=True)
+
+    def _update(self, request, event_id, video_id, partial):
+        event = get_object_or_404(Event, id=event_id)
+        video = get_object_or_404(EventVideo, id=video_id, event=event)
+
+        serializer = EventVideoUpdateSerializer(
+            video, data=request.data, partial=partial
         )
         if serializer.is_valid():
             serializer.save()

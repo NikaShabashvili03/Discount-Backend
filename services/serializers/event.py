@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from services.models import Event, EventImage, Discount, CompanyCategory
+from django.db.models import Avg, Count, Q
+from services.models import Event, EventImage, EventVideo, Discount, CompanyCategory, EventReview
 from .category import CategorySerializer
 from .city import CitySerializer
 from decimal import Decimal
@@ -8,6 +9,11 @@ class EventImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventImage
         fields = ['id', 'alt_text', 'image', 'is_primary', 'order']
+
+class EventVideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventVideo
+        fields = ['id', 'alt_text', 'video', 'is_primary', 'order']
 
 class DiscountSerializer(serializers.ModelSerializer):
     is_valid = serializers.SerializerMethodField()
@@ -26,13 +32,18 @@ class EventListSerializer(serializers.ModelSerializer):
     primary_image = serializers.SerializerMethodField()
     current_discount = serializers.SerializerMethodField()
     discounted_price = serializers.SerializerMethodField()
-    
+    average_rating = serializers.SerializerMethodField()
+    rating_count = serializers.SerializerMethodField()
+    good_reviews_count = serializers.SerializerMethodField()
+    bad_reviews_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Event
         fields = ['id', 'name', 'description',
                  'base_price', 'price_per_person', 'min_people', 'max_people', 'location',
                  'is_popular', 'is_featured', 'views_count', 'bookings_count', 'category', 'city',
-                 'company', 'primary_image', 'longitude', 'latitude', 'current_discount', 'discounted_price', 'created_at']
+                 'company', 'primary_image', 'longitude', 'latitude', 'current_discount', 'discounted_price',
+                 'average_rating', 'rating_count', 'good_reviews_count', 'bad_reviews_count', 'created_at']
     
     def get_primary_image(self, obj):
         primary_image = obj.images.filter(is_primary=True).first()
@@ -55,13 +66,30 @@ class EventListSerializer(serializers.ModelSerializer):
             else:
                 return max(obj.base_price - discount_obj.discount_value, 0)
         return obj.base_price
-    
+
+    def _approved_reviews(self, obj):
+        return obj.reviews.filter(is_approved=True, is_flagged=False)
+
+    def get_average_rating(self, obj):
+        avg = self._approved_reviews(obj).aggregate(avg=Avg('rating'))['avg']
+        return round(avg, 2) if avg is not None else 0
+
+    def get_rating_count(self, obj):
+        return self._approved_reviews(obj).count()
+
+    def get_good_reviews_count(self, obj):
+        return self._approved_reviews(obj).filter(mark='good').count()
+
+    def get_bad_reviews_count(self, obj):
+        return self._approved_reviews(obj).filter(mark='bad').count()
+
 class EventDetailSerializer(EventListSerializer):
     images = EventImageSerializer(many=True, read_only=True)
+    videos = EventVideoSerializer(many=True, read_only=True)
     discounts = DiscountSerializer(many=True, read_only=True)
-    
+
     class Meta(EventListSerializer.Meta):
-        fields = EventListSerializer.Meta.fields + ['images', 'discounts']
+        fields = EventListSerializer.Meta.fields + ['images', 'videos', 'discounts']
     
 class ProviderStatsSerializer(serializers.Serializer):
     total_events = serializers.IntegerField()

@@ -5,5 +5,6 @@ urlpatterns = [
     path('category/', include('staff.urls.category')),
     path('city/', include('staff.urls.city')),
     path('country/', include('staff.urls.country')),
-    path('event/', include('staff.urls.event'))
+    path('event/', include('staff.urls.event')),
+    path('review/', include('staff.urls.review')),
 ]

@@ -63,7 +63,7 @@ class LogoutView(generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         staff = request.staff
-        sessions = StaffSession.objects.filter(staff_id=staff)
+        sessions = StaffSession.objects.filter(staff=staff)
         response = Response({'details': 'Logged out successfully'}, status=status.HTTP_200_OK)
         if sessions:
             sessions.delete()

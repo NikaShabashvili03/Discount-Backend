@@ -49,9 +49,16 @@ LANGUAGES = [
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {levelname} {name}: {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
         },
     },
     'loggers': {
@@ -59,6 +66,11 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,
+        },
+        'orders.payment': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
         },
     },
 }
@@ -76,8 +88,6 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }
-
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -232,10 +242,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-MEDIA_URL = '/uploads/' 
+MEDIA_URL = '/uploads/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760
+# Image uploads are intentionally unlimited at the Django layer. nginx
+# `client_max_body_size` still applies — set that to 0 (no limit) or a large
+# value if huge originals need to be accepted from the public internet.
+DATA_UPLOAD_MAX_MEMORY_SIZE = None
+DATA_UPLOAD_MAX_NUMBER_FIELDS = None
+FILE_UPLOAD_MAX_MEMORY_SIZE = 2621440  # spool above 2.5 MB to disk, no upper cap
 APPEND_SLASH = False
 
 TIME_ZONE = config('DJANGO_TIME_ZONE', default='UTC')
@@ -261,7 +276,12 @@ BOG_PUBLIC_KEY = os.getenv("BOG_PUBLIC_KEY", "YOUR_PUBLIC_KEY_HERE")
 BOG_SECRET_KEY = os.getenv("BOG_SECRET_KEY", "YOUR_SECRET_KEY_HERE")
 
 # Google Pay gatewayMerchantId (provided by BOG, used for the Google Pay button config)
-BOG_GOOGLE_PAY_MERCHANT_ID = os.getenv("BOG_GOOGLE_PAY_MERCHANT_ID", "")
+BOG_GOOGLE_PAY_MERCHANT_ID = os.getenv("BOG_GOOGLE_PAY_MERCHANT_ID", "BCR2DN5TU3P7L4RG")
+
+# Apple Pay merchant identifier (registered with Apple, e.g. "merchant.ge.funfinder").
+# The Apple Pay JS API on the frontend needs this to start a session; merchant
+# validation + certificate handling is done out-of-band with BOG.
+BOG_APPLE_PAY_MERCHANT_ID = os.getenv("BOG_APPLE_PAY_MERCHANT_ID", "")
 
 
 BOG_SUCCESS_URL = os.getenv("BOG_SUCCESS_URL", "BOG_SUCCESS_URL")
@@ -275,3 +295,14 @@ GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "YOUR_GOOGLE_CLIENT_ID_HERE")
 
 SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', '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')
 SENDGRID_EMAIL_SENDER = os.getenv('SENDGRID_EMAIL_SENDER', 'funfinder.ge@gmail.com')
+
+# Recipients for internal order/payment notifications.
+# Env vars override the defaults below for environment-specific routing.
+FUNFINDER_VENDOR_NOTIFICATION_EMAIL = os.getenv(
+    'FUNFINDER_VENDOR_NOTIFICATION_EMAIL',
+    'i.diasamidze@funfinder.ge',
+)
+FUNFINDER_ADMIN_EMAIL = os.getenv(
+    'FUNFINDER_ADMIN_EMAIL',
+    'funfinder.georgia@gmail.com',
+)

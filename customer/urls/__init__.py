@@ -6,5 +6,6 @@ urlpatterns = [
     path('country/', include('customer.urls.country')),
     path('city/', include('customer.urls.city')),
     path('event/', include('customer.urls.event')),
-    path('slider/', include('customer.urls.slider'))
+    path('slider/', include('customer.urls.slider')),
+    path('review/', include('customer.urls.review')),
 ]

@@ -9,12 +9,18 @@ from ..views.event import (
     CompanyEventImageUploadView,
     CompanyEventImageDeleteAPIView,
     CompanyEventImageUpdateAPIView,
+    CompanyEventVideoUploadView,
+    CompanyEventVideoDeleteAPIView,
+    CompanyEventVideoUpdateAPIView,
 )
 
 urlpatterns = [
     path('<int:event_id>/images', CompanyEventImageUploadView.as_view(), name='company-event-image-upload'),
     path('<int:event_id>/images/delete/<int:image_id>', CompanyEventImageDeleteAPIView.as_view(), name='company-event-image-delete'),
     path('<int:event_id>/images/update/<int:image_id>', CompanyEventImageUpdateAPIView.as_view(), name='company-event-image-update'),
+    path('<int:event_id>/videos', CompanyEventVideoUploadView.as_view(), name='company-event-video-upload'),
+    path('<int:event_id>/videos/delete/<int:video_id>', CompanyEventVideoDeleteAPIView.as_view(), name='company-event-video-delete'),
+    path('<int:event_id>/videos/update/<int:video_id>', CompanyEventVideoUpdateAPIView.as_view(), name='company-event-video-update'),
     path('<int:company_id>/list', CompanyEventListView.as_view(), name='company-event-list'),
     path('<int:company_id>/create', CompanyEventCreateView.as_view(), name='company-event-create'),
     path('details/<int:event_id>', CompanyEventDetailView.as_view(), name='company-event-detail'),

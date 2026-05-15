@@ -1,5 +1,6 @@
 from customer.models.customer import Customer
 from django.db import models
+from django.utils import timezone
 
 class CustomerSession(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
@@ -9,7 +10,7 @@ class CustomerSession(models.Model):
     expires_at = models.DateTimeField()
 
     def is_valid(self):
-         return f"{self.session_token}"
-    
+        return self.expires_at > timezone.now()
+
     def __str__(self):
          return f"{self.created_at} / {self.expires_at}"

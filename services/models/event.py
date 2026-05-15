@@ -1,7 +1,7 @@
 from django.db import models
 from staff.models import Company
 from decimal import Decimal
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, FileExtensionValidator
 from services.models.category import Category
 from services.models.city import City
 from ..utils import image_upload, validate_image
@@ -9,6 +9,9 @@ from django.core.exceptions import ValidationError
 
 def upload_service_image(instance, filename):
     return image_upload(instance, filename, 'service_images/')
+
+def upload_service_video(instance, filename):
+    return image_upload(instance, filename, 'service_videos/')
 
 class Event(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="events")
@@ -80,6 +83,31 @@ class EventImage(models.Model):
 
     def __str__(self):
         return f"{self.event.name} | {self.alt_text} | {self.image}"
+
+
+# Videos use FileField (not ImageField) so Pillow doesn't try to validate them.
+# No size or duration cap — every upload is accepted. The extension allowlist
+# keeps `.exe`/`.php`/`.html` from being stored under /uploads.
+ALLOWED_VIDEO_EXTENSIONS = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'm4v', 'ogv']
+
+
+class EventVideo(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='videos')
+    video = models.FileField(
+        upload_to=upload_service_video,
+        validators=[FileExtensionValidator(allowed_extensions=ALLOWED_VIDEO_EXTENSIONS)],
+    )
+    alt_text = models.CharField(max_length=200, blank=True)
+    is_primary = models.BooleanField(default=False)
+    order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'created_at']
+
+    def __str__(self):
+        return f"{self.event.name} | {self.alt_text} | {self.video}"
+
 
 class Discount(models.Model):
     DISCOUNT_TYPES = [

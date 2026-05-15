@@ -10,7 +10,10 @@ from ..views.event import (
     AdminEventDeleteView,
     AdminEventImageUploadView,
     AdminEventImageDeleteAPIView,
-    AdminEventImageUpdateAPIView
+    AdminEventImageUpdateAPIView,
+    AdminEventVideoUploadView,
+    AdminEventVideoDeleteAPIView,
+    AdminEventVideoUpdateAPIView,
 )
 
 urlpatterns = [
@@ -25,4 +28,7 @@ urlpatterns = [
     path('<int:event_id>/images', AdminEventImageUploadView.as_view(), name='admin-event-image-upload'),
     path('<int:event_id>/images/delete/<int:image_id>', AdminEventImageDeleteAPIView.as_view(), name='admin-event-image-delete'),
     path('<int:event_id>/images/update/<int:image_id>', AdminEventImageUpdateAPIView.as_view(), name='admin-event-image-update'),
+    path('<int:event_id>/videos', AdminEventVideoUploadView.as_view(), name='admin-event-video-upload'),
+    path('<int:event_id>/videos/delete/<int:video_id>', AdminEventVideoDeleteAPIView.as_view(), name='admin-event-video-delete'),
+    path('<int:event_id>/videos/update/<int:video_id>', AdminEventVideoUpdateAPIView.as_view(), name='admin-event-video-update'),
 ]

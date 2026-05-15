@@ -1,8 +1,17 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from services.models import Event, CompanyCategory
-from ..serializers.event import EventCreateSerializer, EventUpdateSerializer, EventImageUploadSerializer, EventImage, EventImageUpdateSerializer, EventDetailSerializer
+from services.models import Event, CompanyCategory, EventVideo
+from ..serializers.event import (
+    EventCreateSerializer,
+    EventUpdateSerializer,
+    EventImageUploadSerializer,
+    EventImage,
+    EventImageUpdateSerializer,
+    EventDetailSerializer,
+    EventVideoUploadSerializer,
+    EventVideoUpdateSerializer,
+)
 from ..models.staff import CompanyStaff
 from ..permissions import IsStaffAuthenticated
 from ..middleware import StaffSessionMiddleware
@@ -181,6 +190,77 @@ class CompanyEventImageUpdateAPIView(APIView):
 
         serializer = EventImageUpdateSerializer(
             image, data=request.data, partial=partial
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=200)
+        return Response(serializer.errors, status=400)
+
+
+def _staff_event_or_403(request, event_id):
+    """Shared check for the staff video endpoints — same ownership rules as
+    the image endpoints. Returns (event, error_response). If error_response
+    is not None, the caller must return it."""
+    staff = request.staff
+    event = get_object_or_404(Event, id=event_id)
+    companies = CompanyStaff.objects.filter(staff=staff).values_list('company_id', flat=True)
+    if not companies:
+        return None, Response({"detail": "Staff does not belong to any company"}, status=403)
+    if event.company_id not in companies:
+        return None, Response({"detail": "You do not belong to this company"}, status=403)
+    return event, None
+
+
+class CompanyEventVideoUploadView(APIView):
+    permission_classes = [IsStaffAuthenticated]
+    authentication_classes = [StaffSessionMiddleware]
+
+    def post(self, request, event_id):
+        event, err = _staff_event_or_403(request, event_id)
+        if err is not None:
+            return err
+
+        serializer = EventVideoUploadSerializer(
+            data=request.data, context={'event': event}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CompanyEventVideoDeleteAPIView(APIView):
+    permission_classes = [IsStaffAuthenticated]
+    authentication_classes = [StaffSessionMiddleware]
+
+    def delete(self, request, event_id, video_id):
+        event, err = _staff_event_or_403(request, event_id)
+        if err is not None:
+            return err
+
+        video = get_object_or_404(EventVideo, id=video_id, event=event)
+        video.delete()
+        return Response({"details": "Video Deleted Successfuly"})
+
+
+class CompanyEventVideoUpdateAPIView(APIView):
+    permission_classes = [IsStaffAuthenticated]
+    authentication_classes = [StaffSessionMiddleware]
+
+    def put(self, request, event_id, video_id):
+        return self._update(request, event_id, video_id, partial=False)
+
+    def patch(self, request, event_id, video_id):
+        return self._update(request, event_id, video_id, partial=True)
+
+    def _update(self, request, event_id, video_id, partial):
+        event, err = _staff_event_or_403(request, event_id)
+        if err is not None:
+            return err
+
+        video = get_object_or_404(EventVideo, id=video_id, event=event)
+        serializer = EventVideoUpdateSerializer(
+            video, data=request.data, partial=partial
         )
         if serializer.is_valid():
             serializer.save()

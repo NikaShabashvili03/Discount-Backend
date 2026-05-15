@@ -197,7 +197,7 @@ class LogoutView(generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         customer = request.customer
-        sessions = CustomerSession.objects.filter(customer_id=customer)
+        sessions = CustomerSession.objects.filter(customer=customer)
         response = Response({'details': 'Logged out successfully'}, status=status.HTTP_200_OK)
         if sessions:
             sessions.delete()

@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 
 class Staff(AbstractBaseUser):
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
     firstname = models.CharField(max_length=255)
     lastname = models.CharField(max_length=255)
     country = models.CharField(max_length=100)
@@ -25,7 +25,6 @@ class Staff(AbstractBaseUser):
 class Company(models.Model):
     name = models.CharField(max_length=200)
     founded_year = models.PositiveIntegerField()
-    is_verified = models.BooleanField(default=False)
     description = models.TextField(blank=True, null=True)
 
     is_verified = models.BooleanField(default=True)

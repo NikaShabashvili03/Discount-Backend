@@ -6,6 +6,8 @@ from orders.views.payment import (
     BOGPaymentStatusView,
     BOGGooglePayInitiateView,
     BOGGooglePayConfigView,
+    BOGApplePayInitiateView,
+    BOGApplePayConfigView,
 )
 
 urlpatterns = [
@@ -14,4 +16,6 @@ urlpatterns = [
     path('bog/status/<str:order_id>', BOGPaymentStatusView.as_view(), name='bog-status'),
     path('bog/google-pay/config', BOGGooglePayConfigView.as_view(), name='bog-google-pay-config'),
     path('bog/google-pay/initiate', BOGGooglePayInitiateView.as_view(), name='bog-google-pay-initiate'),
+    path('bog/apple-pay/config', BOGApplePayConfigView.as_view(), name='bog-apple-pay-config'),
+    path('bog/apple-pay/initiate', BOGApplePayInitiateView.as_view(), name='bog-apple-pay-initiate'),
 ]
