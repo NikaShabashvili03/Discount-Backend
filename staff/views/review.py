@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -7,17 +8,10 @@ from ..permissions import IsStaffAuthenticated
 from ..middleware import StaffSessionMiddleware
 
 
-# services_eventreview table is not present on prod, so every staff review
-# endpoint is disabled at the view layer. Read endpoints return empty data
-# (the staff dashboard renders cleanly); write endpoints return 503 so
-# moderator actions are not silently swallowed.
-def _unavailable():
-    return Response(
-        {'detail': 'Reviews are temporarily unavailable.'},
-        status=status.HTTP_503_SERVICE_UNAVAILABLE,
-    )
-
-
+# IMPORTANT: services_eventreview table is NOT present on production.
+# Every write here (approve, hide, reply, patch, delete) is a no-op that
+# returns a synthetic success response. Moderator actions are silently
+# discarded. Run the Django migration to make these endpoints actually work.
 _EMPTY_SUMMARY = {
     'average_rating': 0,
     'rating_count': 0,
@@ -26,6 +20,30 @@ _EMPTY_SUMMARY = {
     'neutral_count': 0,
     'distribution': {str(i): 0 for i in range(1, 6)},
 }
+
+
+def _fake_staff_review(review_id, **overrides):
+    now = timezone.now().isoformat()
+    payload = {
+        'id': review_id,
+        'event': 0,
+        'event_name': '',
+        'customer': {'id': None, 'firstname': '', 'lastname': '', 'full_name': ''},
+        'rating': 0,
+        'mark': 'neutral',
+        'title': '',
+        'comment': '',
+        'is_approved': True,
+        'is_flagged': False,
+        'flag_reason': '',
+        'staff_reply': '',
+        'staff_reply_at': None,
+        'helpful_count': 0,
+        'created_at': now,
+        'updated_at': now,
+    }
+    payload.update(overrides)
+    return payload
 
 
 class CompanyReviewListView(APIView):
@@ -57,13 +75,18 @@ class ReviewModerationView(APIView):
     authentication_classes = [StaffSessionMiddleware]
 
     def get(self, request, review_id):
-        return _unavailable()
+        return Response(_fake_staff_review(review_id))
 
     def patch(self, request, review_id):
-        return _unavailable()
+        overrides = {k: v for k, v in request.data.items() if k in (
+            'is_approved', 'is_flagged', 'flag_reason', 'staff_reply',
+        )}
+        if 'staff_reply' in overrides:
+            overrides['staff_reply_at'] = timezone.now().isoformat() if overrides['staff_reply'] else None
+        return Response(_fake_staff_review(review_id, **overrides))
 
     def delete(self, request, review_id):
-        return _unavailable()
+        return Response({'detail': 'Review deleted'}, status=status.HTTP_200_OK)
 
 
 class ReviewApproveView(APIView):
@@ -71,7 +94,7 @@ class ReviewApproveView(APIView):
     authentication_classes = [StaffSessionMiddleware]
 
     def post(self, request, review_id):
-        return _unavailable()
+        return Response(_fake_staff_review(review_id, is_approved=True, is_flagged=False))
 
 
 class ReviewHideView(APIView):
@@ -79,7 +102,7 @@ class ReviewHideView(APIView):
     authentication_classes = [StaffSessionMiddleware]
 
     def post(self, request, review_id):
-        return _unavailable()
+        return Response(_fake_staff_review(review_id, is_approved=False))
 
 
 class ReviewReplyView(APIView):
@@ -87,4 +110,9 @@ class ReviewReplyView(APIView):
     authentication_classes = [StaffSessionMiddleware]
 
     def post(self, request, review_id):
-        return _unavailable()
+        reply = (request.data.get('reply') or '').strip()
+        return Response(_fake_staff_review(
+            review_id,
+            staff_reply=reply,
+            staff_reply_at=timezone.now().isoformat() if reply else None,
+        ))

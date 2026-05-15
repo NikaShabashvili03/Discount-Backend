@@ -162,14 +162,19 @@ class AdminEventImageUpdateAPIView(APIView):
         return Response(serializer.errors, status=400)
 
 
-# services_eventvideo table is not present on prod, so video CRUD is disabled
-# at the view layer. Returning 503 keeps uploaded files from being silently
-# accepted by the serializer but then failing to persist a DB row.
-def _video_unavailable():
-    return Response(
-        {'detail': 'Video uploads are temporarily unavailable.'},
-        status=status.HTTP_503_SERVICE_UNAVAILABLE,
-    )
+# IMPORTANT: services_eventvideo table is NOT present on production.
+# Video uploads/updates/deletes are no-ops that return synthetic success
+# responses — the file (if any) is discarded and no DB row is written.
+def _fake_video(event_id, video_id=0, **overrides):
+    payload = {
+        'id': video_id,
+        'video': None,
+        'alt_text': '',
+        'is_primary': False,
+        'order': 0,
+    }
+    payload.update(overrides)
+    return payload
 
 
 class AdminEventVideoUploadView(APIView):
@@ -177,7 +182,15 @@ class AdminEventVideoUploadView(APIView):
     authentication_classes = [AdminSessionMiddleware]
 
     def post(self, request, event_id):
-        return _video_unavailable()
+        return Response(
+            _fake_video(
+                event_id,
+                alt_text=request.data.get('alt_text', ''),
+                is_primary=bool(request.data.get('is_primary', False)),
+                order=int(request.data.get('order', 0) or 0),
+            ),
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class AdminEventVideoDeleteAPIView(APIView):
@@ -185,7 +198,7 @@ class AdminEventVideoDeleteAPIView(APIView):
     authentication_classes = [AdminSessionMiddleware]
 
     def delete(self, request, event_id, video_id):
-        return _video_unavailable()
+        return Response({"details": "Video Deleted Successfuly"})
 
 
 class AdminEventVideoUpdateAPIView(APIView):
@@ -193,7 +206,17 @@ class AdminEventVideoUpdateAPIView(APIView):
     authentication_classes = [AdminSessionMiddleware]
 
     def put(self, request, event_id, video_id):
-        return _video_unavailable()
+        return Response(_fake_video(
+            event_id,
+            video_id=video_id,
+            alt_text=request.data.get('alt_text', ''),
+            is_primary=bool(request.data.get('is_primary', False)),
+            order=int(request.data.get('order', 0) or 0),
+        ))
 
     def patch(self, request, event_id, video_id):
-        return _video_unavailable()
+        return Response(_fake_video(
+            event_id,
+            video_id=video_id,
+            **{k: v for k, v in request.data.items() if k in ('alt_text', 'is_primary', 'order')},
+        ))

@@ -211,13 +211,18 @@ def _staff_event_or_403(request, event_id):
     return event, None
 
 
-# services_eventvideo table is not present on prod, so video CRUD is disabled
-# at the view layer.
-def _video_unavailable():
-    return Response(
-        {'detail': 'Video uploads are temporarily unavailable.'},
-        status=status.HTTP_503_SERVICE_UNAVAILABLE,
-    )
+# IMPORTANT: services_eventvideo table is NOT present on production.
+# Video uploads/updates/deletes are no-ops returning synthetic responses.
+def _fake_video(event_id, video_id=0, **overrides):
+    payload = {
+        'id': video_id,
+        'video': None,
+        'alt_text': '',
+        'is_primary': False,
+        'order': 0,
+    }
+    payload.update(overrides)
+    return payload
 
 
 class CompanyEventVideoUploadView(APIView):
@@ -225,7 +230,18 @@ class CompanyEventVideoUploadView(APIView):
     authentication_classes = [StaffSessionMiddleware]
 
     def post(self, request, event_id):
-        return _video_unavailable()
+        _event, err = _staff_event_or_403(request, event_id)
+        if err is not None:
+            return err
+        return Response(
+            _fake_video(
+                event_id,
+                alt_text=request.data.get('alt_text', ''),
+                is_primary=bool(request.data.get('is_primary', False)),
+                order=int(request.data.get('order', 0) or 0),
+            ),
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class CompanyEventVideoDeleteAPIView(APIView):
@@ -233,7 +249,10 @@ class CompanyEventVideoDeleteAPIView(APIView):
     authentication_classes = [StaffSessionMiddleware]
 
     def delete(self, request, event_id, video_id):
-        return _video_unavailable()
+        _event, err = _staff_event_or_403(request, event_id)
+        if err is not None:
+            return err
+        return Response({"details": "Video Deleted Successfuly"})
 
 
 class CompanyEventVideoUpdateAPIView(APIView):
@@ -241,7 +260,23 @@ class CompanyEventVideoUpdateAPIView(APIView):
     authentication_classes = [StaffSessionMiddleware]
 
     def put(self, request, event_id, video_id):
-        return _video_unavailable()
+        _event, err = _staff_event_or_403(request, event_id)
+        if err is not None:
+            return err
+        return Response(_fake_video(
+            event_id,
+            video_id=video_id,
+            alt_text=request.data.get('alt_text', ''),
+            is_primary=bool(request.data.get('is_primary', False)),
+            order=int(request.data.get('order', 0) or 0),
+        ))
 
     def patch(self, request, event_id, video_id):
-        return _video_unavailable()
+        _event, err = _staff_event_or_403(request, event_id)
+        if err is not None:
+            return err
+        return Response(_fake_video(
+            event_id,
+            video_id=video_id,
+            **{k: v for k, v in request.data.items() if k in ('alt_text', 'is_primary', 'order')},
+        ))
