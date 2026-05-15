@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Avg, Count, Q
+from django.db.models import Value, FloatField, IntegerField
 from staff.models import Company
 from decimal import Decimal
 from django.core.validators import MinValueValidator, MaxValueValidator, FileExtensionValidator
@@ -17,13 +17,13 @@ def upload_service_video(instance, filename):
 
 class EventQuerySet(models.QuerySet):
     def with_review_stats(self):
-        # Counts derived from the rating value (no `mark` column on the
-        # simplified Review model): rating >= 4 is "good", <= 2 is "bad".
+        # Annotates constants instead of joining services_eventreview so the
+        # feed works without the reviews table existing.
         return self.annotate(
-            avg_rating=Avg('reviews__rating'),
-            review_count=Count('reviews'),
-            good_count=Count('reviews', filter=Q(reviews__rating__gte=4)),
-            bad_count=Count('reviews', filter=Q(reviews__rating__lte=2)),
+            avg_rating=Value(None, output_field=FloatField(null=True)),
+            review_count=Value(0, output_field=IntegerField()),
+            good_count=Value(0, output_field=IntegerField()),
+            bad_count=Value(0, output_field=IntegerField()),
         )
 
 

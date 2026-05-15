@@ -28,14 +28,9 @@ class ReviewCreateView(APIView):
         event = get_object_or_404(Event, id=event_id)
         serializer = ReviewCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        # One review per (event, customer). Resubmitting overwrites the row
-        # instead of creating a duplicate.
-        review, created = Review.objects.update_or_create(
+        review = Review.objects.create(
             event=event,
             customer=request.customer,
-            defaults=serializer.validated_data,
+            **serializer.validated_data,
         )
-        return Response(
-            ReviewSerializer(review).data,
-            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
-        )
+        return Response(ReviewSerializer(review).data, status=status.HTTP_201_CREATED)
