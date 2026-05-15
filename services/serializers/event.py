@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django.db.models import Avg, Count, Q
 from services.models import Event, EventImage, EventVideo, Discount, CompanyCategory, EventReview
 from .category import CategorySerializer
 from .city import CitySerializer
@@ -67,32 +66,18 @@ class EventListSerializer(serializers.ModelSerializer):
                 return max(obj.base_price - discount_obj.discount_value, 0)
         return obj.base_price
 
-    def _approved_reviews(self, obj):
-        return obj.reviews.filter(is_approved=True, is_flagged=False)
-
     def get_average_rating(self, obj):
         avg = getattr(obj, 'avg_rating', None)
-        if avg is None and not hasattr(obj, 'avg_rating'):
-            avg = self._approved_reviews(obj).aggregate(avg=Avg('rating'))['avg']
         return round(avg, 2) if avg is not None else 0
 
     def get_rating_count(self, obj):
-        count = getattr(obj, 'review_count', None)
-        if count is None:
-            count = self._approved_reviews(obj).count()
-        return count
+        return getattr(obj, 'review_count', 0) or 0
 
     def get_good_reviews_count(self, obj):
-        count = getattr(obj, 'good_count', None)
-        if count is None:
-            count = self._approved_reviews(obj).filter(mark='good').count()
-        return count
+        return getattr(obj, 'good_count', 0) or 0
 
     def get_bad_reviews_count(self, obj):
-        count = getattr(obj, 'bad_count', None)
-        if count is None:
-            count = self._approved_reviews(obj).filter(mark='bad').count()
-        return count
+        return getattr(obj, 'bad_count', 0) or 0
 
 class EventDetailSerializer(EventListSerializer):
     images = EventImageSerializer(many=True, read_only=True)
