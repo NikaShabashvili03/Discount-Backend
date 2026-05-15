@@ -81,11 +81,15 @@ class EventListSerializer(serializers.ModelSerializer):
 
 class EventDetailSerializer(EventListSerializer):
     images = EventImageSerializer(many=True, read_only=True)
-    videos = EventVideoSerializer(many=True, read_only=True)
+    videos = serializers.SerializerMethodField()
     discounts = DiscountSerializer(many=True, read_only=True)
 
     class Meta(EventListSerializer.Meta):
         fields = EventListSerializer.Meta.fields + ['images', 'videos', 'discounts']
+
+    def get_videos(self, obj):
+        # services_eventvideo table is not present on prod; skip the JOIN.
+        return []
     
 class ProviderStatsSerializer(serializers.Serializer):
     total_events = serializers.IntegerField()
