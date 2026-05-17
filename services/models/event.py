@@ -71,7 +71,7 @@ class Event(models.Model):
     def calculate_price(self, people_count):
         if people_count < 1:
             people_count = 1
-        total_price = self.base_price + (self.price_per_person * (people_count - 1))
+        total_price = self.base_price + (self.base_price * (people_count - 1))
         return total_price
     
 
