@@ -165,6 +165,10 @@ class BOGInitiatePaymentView(APIView):
             }
         ]
 
+        payment_methods_to_send = [method]
+        if method == "card":
+            payment_methods_to_send = ["card", "google_pay", "apple_pay"]
+
         payload = {
             "callback_url": settings.BOG_CALLBACK_URL,
             "external_order_id": order.order_number,
@@ -178,7 +182,7 @@ class BOGInitiatePaymentView(APIView):
                 "success": f"{settings.BOG_SUCCESS_URL}/{order_number}?status=success",
                 "fail": f"{settings.BOG_FAIL_URL}/{order_number}?status=fail",
             },
-            "payment_method": [method],
+            "payment_method": payment_methods_to_send,
             "config": {
                 "theme": "light",
                 "capture": "automatic"
