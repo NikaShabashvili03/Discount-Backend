@@ -903,33 +903,85 @@ class BOGPaymentCallbackView(APIView):
 # -------------------------------
 # CHECK PAYMENT STATUS / RECEIPT
 # -------------------------------
+
+
+
+
 class BOGPaymentStatusView(APIView):
-    permission_classes = [IsCustomerAuthenticated]
-    authentication_classes = [CustomerSessionMiddleware]
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request, order_id):
-        # Scope to the authenticated customer — payment receipts are personal data.
         try:
-            order = (
-                Order.objects
-                .select_related("payment")
-                .get(order_number=order_id, customer=request.customer)
+            token = get_bog_access_token(
+                settings.BOG_PUBLIC_KEY,
+                settings.BOG_SECRET_KEY
             )
-        except Order.DoesNotExist:
+        except Exception as e:
             return Response(
-                {"success": False, "message": "Order not found."},
-                status=404
+                {
+                    "error": "Failed to authenticate with BOG",
+                    "details": str(e),
+                },
+                status=500,
             )
 
-        payment = getattr(order, "payment", None)
-        if payment is None:
-            return Response(
-                {"success": False, "message": "Payment record not found."},
-                status=404
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        }
+
+        try:
+            response = requests.get(
+                f"{settings.BOG_BASE_URL}/payments/v1/receipt/{order_id}",
+                headers=headers,
+                timeout=10,
             )
 
-        return Response(PaymentSerializer(payment).data)
+            return Response(
+                response.json(),
+                status=response.status_code,
+            )
+
+        except Exception as e:
+            return Response(
+                {
+                    "error": "Failed to fetch payment status",
+                    "details": str(e),
+                },
+                status=500,
+            )
+        
+        
+# class BOGPaymentStatusView(APIView):
+#     permission_classes = [IsCustomerAuthenticated]
+#     authentication_classes = [CustomerSessionMiddleware]
+
+#     def get(self, request, order_id):
+#         # Scope to the authenticated customer — payment receipts are personal data.
+#         try:
+#             order = (
+#                 Order.objects
+#                 .select_related("payment")
+#                 .get(order_number=order_id, customer=request.customer)
+#             )
+#         except Order.DoesNotExist:
+#             return Response(
+#                 {"success": False, "message": "Order not found."},
+#                 status=404
+#             )
+
+#         payment = getattr(order, "payment", None)
+#         if payment is None:
+#             return Response(
+#                 {"success": False, "message": "Payment record not found."},
+#                 status=404
+#             )
+
+#         return Response(PaymentSerializer(payment).data)
     
+
+
 # -------------------------------
 # CHECK PAYMENT STATUS / RECEIPT
 # -------------------------------
