@@ -5,8 +5,6 @@ PAYMENT_METHODS = [
     ('card', 'Credit/Debit Card'),
     ('bog_p2p', 'BoG P2P Transfer'),
     ('bog_loyalty', 'BoG Loyalty Points'),
-    ('bog_loan', 'BoG Installments'),
-    ('bnpl', 'Buy Now Pay Later'),
     ('google_pay', 'Google Pay'),
     ('apple_pay', 'Apple Pay'),
     ('gift_card', 'Gift Card'),
