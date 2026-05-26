@@ -35,7 +35,8 @@ class EventListSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description',
                  'base_price', 'price_per_person', 'min_people', 'max_people', 'location',
                  'is_popular', 'is_featured', 'views_count', 'bookings_count', 'category', 'city',
-                 'company', 'primary_image', 'latitude', 'longitude', 'current_discount', 'discounted_price', 'created_at']
+                 'company', 'primary_image', 'latitude', 'longitude', 'current_discount', 'discounted_price', 'created_at',
+                 'event_ticket']
     
     def get_primary_image(self, obj):
         primary_image = obj.images.filter(is_primary=True).first()
@@ -78,7 +79,8 @@ class EventCreateSerializer(serializers.ModelSerializer):
         model = Event
         fields = ['name', 'description', 'category', 'city',
                   'base_price', 'price_per_person', 'min_people', 'max_people',
-                  'location', 'latitude', 'longitude', 'is_popular', 'is_featured', 'company_id']
+                  'location', 'latitude', 'longitude', 'is_popular', 'is_featured', 'company_id',
+                  'event_ticket']
 
     def create(self, validated_data):
         staff = self.context['request'].staff
@@ -101,7 +103,8 @@ class EventUpdateSerializer(serializers.ModelSerializer):
         model = Event
         fields = ['name', 'description', 'category', 'city',
                   'base_price', 'price_per_person', 'min_people', 'max_people',
-                  'location', 'latitude', 'longitude', 'is_popular', 'is_featured']
+                  'location', 'latitude', 'longitude', 'is_popular', 'is_featured',
+                  'event_ticket']
 
 class EventDeleteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -121,6 +124,7 @@ class AdminEventCreateSerializer(serializers.ModelSerializer):
             'min_people', 'max_people',
             'location', 'latitude', 'longitude',
             'is_popular', 'is_featured',
+            'event_ticket',
         ]
 
     def validate(self, attrs):

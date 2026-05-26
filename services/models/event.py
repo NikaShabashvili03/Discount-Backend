@@ -57,6 +57,28 @@ class Event(models.Model):
     views_count = models.IntegerField(default=0)
     bookings_count = models.IntegerField(default=0)
 
+    TICKET_CHOICES = [
+        ('per hour', 'per hour'),
+        ('per day', 'per day'),
+        ('per kilometer', 'per kilometer'),
+        ('per room', 'per room'),
+        ('per person', 'per person'),
+        ('per car', 'per car'),
+        ('per boat', 'per boat'),
+        ('per driver', 'per driver'),
+        ('per 10 minutes', 'per 10 minutes'),
+        ('per 15 minutes', 'per 15 minutes'),
+        ('per 30 minutes', 'per 30 minutes'),
+        ('per loop', 'per loop'),
+    ]
+    event_ticket = models.CharField(
+        max_length=50,
+        choices=TICKET_CHOICES,
+        null=True,
+        blank=True,
+        help_text="Optional ticket pricing/unit type"
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
