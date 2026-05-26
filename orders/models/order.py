@@ -45,6 +45,7 @@ class Order(models.Model):
     commission_amount = models.DecimalField(max_digits=10, decimal_places=2)
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    event_ticket = models.CharField(max_length=50, null=True, blank=True, help_text="Ticket pricing/unit type at the time of purchase")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

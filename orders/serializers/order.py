@@ -32,6 +32,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         validated_data['customer_email'] = getattr(customer, 'email', '')
         validated_data['customer_phone'] = getattr(customer, 'mobile', '')
         validated_data['customer_country'] = getattr(customer, 'country', '')
+        validated_data['event_ticket'] = event.event_ticket
 
         base_price = event.calculate_price(people_count)
 
@@ -73,7 +74,7 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ['id', 'order_number', 'customer', 'event', 'customer_name', 'customer_email',
                  'customer_phone', 'customer_country', 'people_count', 'event_date', 'notes',
                  'base_price', 'discount_amount', 'total_price', 'commission_amount', 'status',
-                 'created_at', 'updated_at']
+                 'event_ticket', 'created_at', 'updated_at']
         # Every field is read-only on this serializer. Order state transitions
         # (status -> paid/refunded, prices, etc.) MUST come from the BOG callback
         # or admin tooling, never from the customer-facing API. Customer-visible
