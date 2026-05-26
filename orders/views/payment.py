@@ -673,7 +673,7 @@ class BOGPaymentCallbackView(APIView):
         """Shared context for the order_confirmation.html template."""
         currency = getattr(order, "currency", "GEL")
         event = getattr(order, "event", None)
-        ticket_type = event.category.activity if event else "Unknown"
+        ticket_type = event.event_ticket if event and event.event_ticket else (event.category.activity if event else "Unknown")
         event_name = event.name if event else "N/A"
     
         # Primary event image → absolute URL (blank if none).

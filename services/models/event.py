@@ -127,7 +127,7 @@ ALLOWED_VIDEO_EXTENSIONS = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'm4v', 'ogv']
 
 
 class EventVideo(models.Model):
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='videos')
+    event = models.ForeignKey(Event, on_delete=models.DO_NOTHING, related_name='videos')
     video = models.FileField(
         upload_to=upload_service_video,
         validators=[FileExtensionValidator(allowed_extensions=ALLOWED_VIDEO_EXTENSIONS)],
