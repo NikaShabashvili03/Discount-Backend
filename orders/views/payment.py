@@ -167,7 +167,7 @@ class BOGInitiatePaymentView(APIView):
 
         payment_methods_to_send = [method]
         if method == "card":
-            payment_methods_to_send = ["card", "google_pay", "apple_pay", "bog_loan"]
+            payment_methods_to_send = ["card", "google_pay", "apple_pay"]
 
         payload = {
             "callback_url": settings.BOG_CALLBACK_URL,
