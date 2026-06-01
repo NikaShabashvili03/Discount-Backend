@@ -41,7 +41,7 @@ LANGUAGES = [
     ("en", _("English")),
     ("ka", _("Georgian")),
     ("ru", _("Russian")),
-    ("tr", _("Turkish")),   
+    ("hi", _("Hindi")),   
     ("ar", _("Arabic")),    
     ("he", _("Hebrew")),    
 ]
@@ -75,7 +75,7 @@ LOGGING = {
     },
 }
 
-MODELTRANSLATION_LANGUAGES = ('en', 'ka', 'ru', 'tr', 'ar', 'he')
+MODELTRANSLATION_LANGUAGES = ('en', 'ka', 'ru', 'hi', 'ar', 'he')
 
 LOCALE_PATHS = [
     os.path.join(BASE_DIR, 'locale'),
