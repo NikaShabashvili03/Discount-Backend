@@ -280,3 +280,40 @@ class CompanyEventVideoUpdateAPIView(APIView):
             video_id=video_id,
             **{k: v for k, v in request.data.items() if k in ('alt_text', 'is_primary', 'order')},
         ))
+
+
+class CompanyOrderDetailByNumberView(APIView):
+    permission_classes = [IsStaffAuthenticated]
+    authentication_classes = [StaffSessionMiddleware]
+
+    def get(self, request, order_number):
+        staff = request.staff
+        order = get_object_or_404(Order, order_number=order_number)
+
+        if not CompanyStaff.objects.filter(staff=staff, company=order.event.company).exists():
+            return Response({"detail": "You do not belong to this company"}, status=403)
+
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)
+
+
+class CompanyOrderMarkUsedView(APIView):
+    permission_classes = [IsStaffAuthenticated]
+    authentication_classes = [StaffSessionMiddleware]
+
+    def post(self, request, order_number):
+        staff = request.staff
+        order = get_object_or_404(Order, order_number=order_number)
+
+        if not CompanyStaff.objects.filter(staff=staff, company=order.event.company).exists():
+            return Response({"detail": "You do not belong to this company"}, status=403)
+
+        if order.is_used:
+            return Response({"detail": "Ticket has already been used."}, status=status.HTTP_400_BAD_REQUEST)
+
+        order.is_used = True
+        order.save()
+
+        serializer = OrderSerializer(order)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+

@@ -12,6 +12,8 @@ from ..views.event import (
     CompanyEventVideoUploadView,
     CompanyEventVideoDeleteAPIView,
     CompanyEventVideoUpdateAPIView,
+    CompanyOrderDetailByNumberView,
+    CompanyOrderMarkUsedView,
 )
 
 urlpatterns = [
@@ -27,4 +29,6 @@ urlpatterns = [
     path('update/<int:event_id>', CompanyEventUpdateView.as_view(), name='company-event-update'),
     path('delete/<int:event_id>', CompanyEventDeleteView.as_view(), name='company-event-delete'),
     path('orders/<int:company_id>', CompanyOrderListView.as_view(), name='company-order-list'),
+    path('orders/number/<str:order_number>', CompanyOrderDetailByNumberView.as_view(), name='company-order-detail-by-number'),
+    path('orders/<str:order_number>/mark-used', CompanyOrderMarkUsedView.as_view(), name='company-order-mark-used'),
 ]

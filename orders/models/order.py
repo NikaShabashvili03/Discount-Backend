@@ -46,6 +46,7 @@ class Order(models.Model):
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     event_ticket = models.CharField(max_length=50, null=True, blank=True, help_text="Ticket pricing/unit type at the time of purchase")
+    is_used = models.BooleanField(default=False, help_text="Designates whether the ticket has been scanned and used")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

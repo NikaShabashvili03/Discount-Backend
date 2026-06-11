@@ -74,7 +74,7 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ['id', 'order_number', 'customer', 'event', 'customer_name', 'customer_email',
                  'customer_phone', 'customer_country', 'people_count', 'event_date', 'notes',
                  'base_price', 'discount_amount', 'total_price', 'commission_amount', 'status',
-                 'event_ticket', 'created_at', 'updated_at']
+                 'event_ticket', 'is_used', 'created_at', 'updated_at']
         # Every field is read-only on this serializer. Order state transitions
         # (status -> paid/refunded, prices, etc.) MUST come from the BOG callback
         # or admin tooling, never from the customer-facing API. Customer-visible
