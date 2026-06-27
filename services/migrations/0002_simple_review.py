@@ -16,10 +16,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.SeparateDatabaseAndState(
-            state_operations=[
-                migrations.DeleteModel(name='EventReviewHelpful'),
-                migrations.DeleteModel(name='EventReview'),
-            ],
+            state_operations=[],
             database_operations=[],
         ),
         migrations.CreateModel(

@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('services', '0004_alter_review_unique_together_event_event_ticket'),
+        ('services', '0002_simple_review'),
     ]
 
     operations = [

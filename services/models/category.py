@@ -9,7 +9,8 @@ def upload_category_icon(instance, filename):
 class Category(models.Model):
     ACTIVITY_CHOICE = (
         ('water', 'Water activity'),
-        ('land', 'Land activity')
+        ('land', 'Land activity'),
+        ('special', 'Special activity')
     )
 
     name = models.CharField(max_length=100)

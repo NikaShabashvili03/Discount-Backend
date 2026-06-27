@@ -1,2 +1,2 @@
-from .order import Order
+from .order import Order, OrderAgePrice
 from .payment import Payment
