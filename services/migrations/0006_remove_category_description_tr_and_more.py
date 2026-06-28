@@ -13,37 +13,42 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='category',
-            name='description_tr',
-        ),
-        migrations.RemoveField(
-            model_name='category',
-            name='name_tr',
-        ),
-        migrations.RemoveField(
-            model_name='city',
-            name='name_tr',
-        ),
-        migrations.RemoveField(
-            model_name='country',
-            name='name_tr',
-        ),
-        migrations.RemoveField(
-            model_name='discount',
-            name='name_tr',
-        ),
-        migrations.RemoveField(
-            model_name='event',
-            name='description_tr',
-        ),
-        migrations.RemoveField(
-            model_name='event',
-            name='name_tr',
-        ),
-        migrations.RemoveField(
-            model_name='eventimage',
-            name='alt_text_tr',
+        migrations.SeparateDatabaseAndState(
+            database_operations=[],
+            state_operations=[
+                migrations.RemoveField(
+                    model_name='category',
+                    name='description_tr',
+                ),
+                migrations.RemoveField(
+                    model_name='category',
+                    name='name_tr',
+                ),
+                migrations.RemoveField(
+                    model_name='city',
+                    name='name_tr',
+                ),
+                migrations.RemoveField(
+                    model_name='country',
+                    name='name_tr',
+                ),
+                migrations.RemoveField(
+                    model_name='discount',
+                    name='name_tr',
+                ),
+                migrations.RemoveField(
+                    model_name='event',
+                    name='description_tr',
+                ),
+                migrations.RemoveField(
+                    model_name='event',
+                    name='name_tr',
+                ),
+                migrations.RemoveField(
+                    model_name='eventimage',
+                    name='alt_text_tr',
+                ),
+            ]
         ),
         migrations.AddField(
             model_name='event',
