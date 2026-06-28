@@ -100,10 +100,6 @@ class Event(models.Model):
         blank=True,
         help_text="Optional ticket pricing/unit type"
     )
-
-    seo_title = models.CharField(max_length=200, null=True, blank=True, help_text="SEO Title override")
-    seo_description = models.TextField(null=True, blank=True, help_text="SEO Meta Description override")
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

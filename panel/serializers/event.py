@@ -38,7 +38,7 @@ class EventListSerializer(serializers.ModelSerializer):
             'min_people', 'max_people', 'location',
             'is_popular', 'is_featured', 'views_count', 'bookings_count', 'category', 'city',
             'company', 'primary_image', 'longitude', 'latitude', 'current_discount', 'discounted_price', 'created_at',
-            'event_ticket', 'seo_title', 'seo_description',
+            'event_ticket',
             'name_en', 'name_ka', 'name_ru', 'name_hi', 'name_ar', 'name_he',
             'description_en', 'description_ka', 'description_ru', 'description_hi', 'description_ar', 'description_he'
         ]
@@ -87,7 +87,7 @@ class EventCreateSerializer(serializers.ModelSerializer):
                   'base_price', 'price_per_person', 'adult_price', 'child_price', 'infant_price',
                   'min_people', 'max_people',
                   'location', 'latitude', 'longitude', 'is_popular', 'is_featured', 'company_id',
-                  'event_ticket', 'seo_title', 'seo_description',
+            'event_ticket',
                   'name_en', 'name_ka', 'name_ru', 'name_hi', 'name_ar', 'name_he',
                   'description_en', 'description_ka', 'description_ru', 'description_hi', 'description_ar', 'description_he']
 
@@ -114,7 +114,7 @@ class EventUpdateSerializer(serializers.ModelSerializer):
                   'base_price', 'price_per_person', 'adult_price', 'child_price', 'infant_price',
                   'min_people', 'max_people',
                   'location', 'latitude', 'longitude', 'is_popular', 'is_featured',
-                  'event_ticket', 'seo_title', 'seo_description',
+            'event_ticket',
                   'name_en', 'name_ka', 'name_ru', 'name_hi', 'name_ar', 'name_he',
                   'description_en', 'description_ka', 'description_ru', 'description_hi', 'description_ar', 'description_he']
 
@@ -137,7 +137,7 @@ class AdminEventCreateSerializer(serializers.ModelSerializer):
             'min_people', 'max_people',
             'location', 'latitude', 'longitude',
             'is_popular', 'is_featured',
-            'event_ticket', 'seo_title', 'seo_description',
+            'event_ticket',
             'name_en', 'name_ka', 'name_ru', 'name_hi', 'name_ar', 'name_he',
             'description_en', 'description_ka', 'description_ru', 'description_hi', 'description_ar', 'description_he',
             'age_prices'
