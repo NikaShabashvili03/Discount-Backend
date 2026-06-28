@@ -36,9 +36,6 @@ class Order(models.Model):
     customer_country = models.CharField(max_length=100)
 
     people_count = models.IntegerField()
-    adults_count = models.IntegerField(default=0)
-    children_count = models.IntegerField(default=0)
-    infants_count = models.IntegerField(default=0)
     event_date = models.DateTimeField()
     notes = models.TextField(blank=True)
 
@@ -75,17 +72,3 @@ class Order(models.Model):
             if not Order.objects.filter(order_number=candidate).exists():
                 return candidate
         raise RuntimeError("Could not allocate a unique order_number after 10 attempts.")
-
-
-class OrderAgePrice(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='age_prices')
-    category_name = models.CharField(max_length=50)
-    min_age = models.IntegerField()
-    max_age = models.IntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    quantity = models.IntegerField()
-    start_time = models.TimeField(null=True, blank=True, help_text="Applicable start time (for special type events)")
-    end_time = models.TimeField(null=True, blank=True, help_text="Applicable end time (for special type events)")
-
-    def __str__(self):
-        return f"{self.order.order_number} - {self.category_name} x {self.quantity}"

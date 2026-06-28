@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from services.models import Event, EventImage, EventVideo, Discount, CompanyCategory, EventAgePrice
-from services.serializers.event import EventVideoSerializer, EventAgePriceSerializer
+from services.models import Event, EventImage, EventVideo, Discount, CompanyCategory
+from services.serializers.event import EventVideoSerializer
 from .category import CategorySerializer
 from staff.models.staff import Company, CompanyStaff
 from .city import CitySerializer
@@ -34,8 +34,7 @@ class EventListSerializer(serializers.ModelSerializer):
         model = Event
         fields = [
             'id', 'name', 'description',
-            'base_price', 'price_per_person', 'adult_price', 'child_price', 'infant_price',
-            'min_people', 'max_people', 'location',
+            'base_price', 'price_per_person', 'min_people', 'max_people', 'location',
             'is_popular', 'is_featured', 'views_count', 'bookings_count', 'category', 'city',
             'company', 'primary_image', 'longitude', 'latitude', 'current_discount', 'discounted_price', 'created_at',
             'event_ticket',
@@ -69,10 +68,9 @@ class EventDetailSerializer(EventListSerializer):
     images = EventImageSerializer(many=True, read_only=True)
     videos = serializers.SerializerMethodField()
     discounts = DiscountSerializer(many=True, read_only=True)
-    age_prices = EventAgePriceSerializer(many=True, read_only=True)
 
     class Meta(EventListSerializer.Meta):
-        fields = EventListSerializer.Meta.fields + ['images', 'videos', 'discounts', 'age_prices']
+        fields = EventListSerializer.Meta.fields + ['images', 'videos', 'discounts']
 
     def get_videos(self, obj):
         # services_eventvideo table is not present on prod; skip the JOIN.
@@ -84,8 +82,7 @@ class EventCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ['name', 'description', 'category', 'city',
-                  'base_price', 'price_per_person', 'adult_price', 'child_price', 'infant_price',
-                  'min_people', 'max_people',
+                  'base_price', 'price_per_person', 'min_people', 'max_people',
                   'location', 'latitude', 'longitude', 'is_popular', 'is_featured', 'company_id',
             'event_ticket',
                   'name_en', 'name_ka', 'name_ru', 'name_hi', 'name_ar', 'name_he',
@@ -111,8 +108,7 @@ class EventUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ['name', 'description', 'category', 'city',
-                  'base_price', 'price_per_person', 'adult_price', 'child_price', 'infant_price',
-                  'min_people', 'max_people',
+                  'base_price', 'price_per_person', 'min_people', 'max_people',
                   'location', 'latitude', 'longitude', 'is_popular', 'is_featured',
             'event_ticket',
                   'name_en', 'name_ka', 'name_ru', 'name_hi', 'name_ar', 'name_he',
@@ -125,7 +121,6 @@ class EventDeleteSerializer(serializers.ModelSerializer):
 
 class AdminEventCreateSerializer(serializers.ModelSerializer):
     company_id = serializers.IntegerField(write_only=True)
-    age_prices = EventAgePriceSerializer(many=True, required=False)
 
     class Meta:
         model = Event
@@ -133,14 +128,13 @@ class AdminEventCreateSerializer(serializers.ModelSerializer):
             'company_id',
             'name', 'description',
             'category', 'city',
-            'base_price', 'price_per_person', 'adult_price', 'child_price', 'infant_price',
+            'base_price', 'price_per_person',
             'min_people', 'max_people',
             'location', 'latitude', 'longitude',
             'is_popular', 'is_featured',
             'event_ticket',
             'name_en', 'name_ka', 'name_ru', 'name_hi', 'name_ar', 'name_he',
-            'description_en', 'description_ka', 'description_ru', 'description_hi', 'description_ar', 'description_he',
-            'age_prices'
+            'description_en', 'description_ka', 'description_ru', 'description_hi', 'description_ar', 'description_he'
         ]
 
     def validate(self, attrs):
@@ -160,24 +154,10 @@ class AdminEventCreateSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        age_prices_data = validated_data.pop('age_prices', [])
         company_id = validated_data.pop('company_id')
         company = get_object_or_404(Company, id=company_id)
         validated_data['company'] = company
-        
-        event = super().create(validated_data)
-        for ap_data in age_prices_data:
-            EventAgePrice.objects.create(event=event, **ap_data)
-        return event
-
-    def update(self, instance, validated_data):
-        age_prices_data = validated_data.pop('age_prices', None)
-        event = super().update(instance, validated_data)
-        if age_prices_data is not None:
-            event.age_prices.all().delete()
-            for ap_data in age_prices_data:
-                EventAgePrice.objects.create(event=event, **ap_data)
-        return event
+        return super().create(validated_data)
     
 class ProviderStatsSerializer(serializers.Serializer):
     total_events = serializers.IntegerField()

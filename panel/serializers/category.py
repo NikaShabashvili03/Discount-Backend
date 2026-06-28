@@ -20,8 +20,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class CategoryCreateUpdateSerializer(serializers.Serializer):
     ACTIVITY_CHOICE = (
         ('water', 'Water activity'),
-        ('land', 'Land activity'),
-        ('special', 'Special activity')
+        ('land', 'Land activity')
     )
     name = serializers.CharField(max_length=255)
     description = serializers.CharField(required=False, allow_blank=True)
