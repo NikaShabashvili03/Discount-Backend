@@ -50,7 +50,7 @@ class EventListSerializer(serializers.ModelSerializer):
             'is_popular', 'is_featured', 'views_count', 'bookings_count', 'category', 'city',
             'company', 'primary_image', 'longitude', 'latitude', 'current_discount', 'discounted_price',
             'average_rating', 'rating_count', 'good_reviews_count', 'bad_reviews_count', 'created_at',
-            'event_ticket',
+            'event_ticket', 'seo_title', 'seo_description',
             'name_en', 'name_ka', 'name_ru', 'name_hi', 'name_ar', 'name_he',
             'description_en', 'description_ka', 'description_ru', 'description_hi', 'description_ar', 'description_he'
         ]
