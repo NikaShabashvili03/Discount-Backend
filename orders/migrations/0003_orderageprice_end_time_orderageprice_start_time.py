@@ -10,6 +10,21 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunSQL(
+            sql="""
+            CREATE TABLE IF NOT EXISTS `orders_orderageprice` (
+                `id` bigint AUTO_INCREMENT NOT NULL PRIMARY KEY,
+                `category_name` varchar(50) NOT NULL,
+                `min_age` integer NOT NULL,
+                `max_age` integer NOT NULL,
+                `price` decimal(10, 2) NOT NULL,
+                `quantity` integer NOT NULL,
+                `order_id` bigint NOT NULL,
+                CONSTRAINT `orders_orderageprice_order_id_fk` FOREIGN KEY (`order_id`) REFERENCES `orders_order` (`id`)
+            );
+            """,
+            reverse_sql="DROP TABLE IF EXISTS `orders_orderageprice`;"
+        ),
         migrations.AddField(
             model_name='orderageprice',
             name='end_time',
