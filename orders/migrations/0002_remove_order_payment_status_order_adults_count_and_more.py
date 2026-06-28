@@ -11,9 +11,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='order',
-            name='payment_status',
+        migrations.SeparateDatabaseAndState(
+            database_operations=[],
+            state_operations=[
+                migrations.RemoveField(
+                    model_name='order',
+                    name='payment_status',
+                ),
+            ]
         ),
         migrations.AddField(
             model_name='order',
