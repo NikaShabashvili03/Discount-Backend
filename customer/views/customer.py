@@ -73,7 +73,6 @@ class GoogleLoginView(generics.GenericAPIView):
 
         # 5. Prepare Response
         customer_data = CustomerSerializer(customer).data
-        customer_data['customer_session_token'] = session.session_token
         response = Response(customer_data, status=status.HTTP_200_OK)
         
         response.set_cookie(
@@ -116,7 +115,6 @@ class RegisterView(generics.GenericAPIView):
         )
 
         customer_data = CustomerSerializer(customer).data
-        customer_data['customer_session_token'] = session.session_token
 
         response = Response(customer_data, status=status.HTTP_200_OK)
         response.set_cookie(
@@ -153,7 +151,6 @@ class LoginView(generics.GenericAPIView):
         )
 
         customer_data = CustomerSerializer(customer).data
-        customer_data['customer_session_token'] = session.session_token
         
         response = Response(customer_data, status=status.HTTP_200_OK)
         response.set_cookie(
