@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from services.models import Event, EventImage, EventVideo, Discount, CompanyCategory
+from services.models import Event, EventImage, EventVideo, Discount, CompanyCategory, EventAgePrice
 from .category import CategorySerializer
 from .city import CitySerializer
 from decimal import Decimal
@@ -13,6 +13,11 @@ class EventVideoSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventVideo
         fields = ['id', 'alt_text', 'video', 'is_primary', 'order']
+
+class EventAgePriceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventAgePrice
+        fields = ['id', 'category_name', 'min_age', 'max_age', 'price', 'start_time', 'end_time']
 
 class DiscountSerializer(serializers.ModelSerializer):
     is_valid = serializers.SerializerMethodField()
@@ -40,7 +45,8 @@ class EventListSerializer(serializers.ModelSerializer):
         model = Event
         fields = [
             'id', 'name', 'description',
-            'base_price', 'price_per_person', 'min_people', 'max_people', 'location',
+            'base_price', 'price_per_person', 'adult_price', 'child_price', 'infant_price',
+            'min_people', 'max_people', 'location',
             'is_popular', 'is_featured', 'views_count', 'bookings_count', 'category', 'city',
             'company', 'primary_image', 'longitude', 'latitude', 'current_discount', 'discounted_price',
             'average_rating', 'rating_count', 'good_reviews_count', 'bad_reviews_count', 'created_at',
@@ -88,9 +94,10 @@ class EventDetailSerializer(EventListSerializer):
     images = EventImageSerializer(many=True, read_only=True)
     videos = serializers.SerializerMethodField()
     discounts = DiscountSerializer(many=True, read_only=True)
+    age_prices = EventAgePriceSerializer(many=True, read_only=True)
 
     class Meta(EventListSerializer.Meta):
-        fields = EventListSerializer.Meta.fields + ['images', 'videos', 'discounts']
+        fields = EventListSerializer.Meta.fields + ['images', 'videos', 'discounts', 'age_prices']
 
     def get_videos(self, obj):
         # services_eventvideo table is not present on prod; skip the JOIN.
@@ -116,7 +123,16 @@ class EventStatsSerializer(serializers.Serializer):
 
 class PriceCalculationSerializer(serializers.Serializer):
     event_id = serializers.UUIDField()
-    people_count = serializers.IntegerField(min_value=1)
+    people_count = serializers.IntegerField(required=False, min_value=1)
+    adults_count = serializers.IntegerField(required=False, min_value=0, default=0)
+    children_count = serializers.IntegerField(required=False, min_value=0, default=0)
+    infants_count = serializers.IntegerField(required=False, min_value=0, default=0)
+    event_date = serializers.DateTimeField(required=False, allow_null=True)
+    age_prices = serializers.ListField(
+        child=serializers.DictField(),
+        required=False,
+        allow_empty=True
+    )
     
     def validate(self, attrs):
         try:
@@ -131,19 +147,45 @@ class PriceCalculationSerializer(serializers.Serializer):
         except Event.DoesNotExist:
             raise serializers.ValidationError('Event not found')
         
-        # people_count = attrs['people_count']
-        # if people_count < event.min_people or people_count > event.max_people:
-        #     raise serializers.ValidationError(
-        #         f'People count must be between {event.min_people} and {event.max_people}'
-        #     )
-        
         return attrs
     
     def to_representation(self, instance):
         event = instance['event']
-        people_count = instance['people_count']
+        age_prices_data = instance.get('age_prices')
+        event_date = instance.get('event_date')
         
-        base_price = event.calculate_price(people_count)
+        if age_prices_data:
+            people_count = 0
+            adults_count = 0
+            children_count = 0
+            infants_count = 0
+            for item in age_prices_data:
+                try:
+                    ap = event.age_prices.get(id=item.get('age_price_id'))
+                    qty = item.get('quantity', 0)
+                    people_count += qty
+                    if ap.max_age <= 2:
+                        infants_count += qty
+                    elif ap.max_age <= 12:
+                        children_count += qty
+                    else:
+                        adults_count += qty
+                except EventAgePrice.DoesNotExist:
+                    pass
+            base_price = event.calculate_price(age_prices_data=age_prices_data, event_date=event_date)
+        else:
+            adults_count = instance.get('adults_count', 0)
+            children_count = instance.get('children_count', 0)
+            infants_count = instance.get('infants_count', 0)
+            
+            if adults_count == 0 and children_count == 0 and infants_count == 0:
+                people_count = instance.get('people_count', 1)
+                adults_count = people_count
+            else:
+                people_count = adults_count + children_count + infants_count
+                
+            base_price = event.calculate_price(people_count, adults_count, children_count, infants_count, event_date=event_date)
+            
         discount_amount = Decimal('0.00')
         discount_info = None
         
@@ -168,6 +210,9 @@ class PriceCalculationSerializer(serializers.Serializer):
             'event_id': event.id,
             'event_name': event.name,
             'people_count': people_count,
+            'adults_count': adults_count,
+            'children_count': children_count,
+            'infants_count': infants_count,
             'base_price': base_price,
             'discount': discount_info,
             'discount_amount': discount_amount,
